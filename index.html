@@ -4,490 +4,252 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Что если.. — Production Schedule</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0d0d0d;
-  --surface: #141414;
-  --surface2: #1a1a1a;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0f0ee;
-  --muted: #666;
-  --muted2: #444;
-  --управление: #a78bfa;
-  --концепция: #34d399;
-  --ии: #fb923c;
-  --пост: #60a5fa;
-  --active: rgba(255,255,255,0.9);
-  --row-h: 36px;
-  --label-w: 260px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { background: var(--bg); }
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* HEADER */
-.header {
-  padding: 48px 48px 32px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 24px;
-}
-.header-left h1 {
-  font-family: 'Unbounded', sans-serif;
-  font-size: clamp(22px, 4vw, 36px);
-  font-weight: 300;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--text);
-}
-.header-left h1 span { color: var(--мuted); opacity: 0.4; }
-.header-meta {
-  display: flex;
-  gap: 32px;
-  margin-top: 16px;
-}
-.meta-item { font-size: 12px; color: var(--muted); }
-.meta-item strong { display: block; font-size: 20px; font-weight: 400; color: var(--text); font-family: 'Unbounded', sans-serif; }
-
-/* FILTERS */
-.filters {
-  padding: 20px 48px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.filter-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
-.pill {
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  padding: 5px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.pill:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
-.pill.active { color: #0d0d0d; border-color: transparent; }
-.pill[data-group="all"].active { background: var(--text); }
-.pill[data-group="Управление"].active { background: var(--управление); }
-.pill[data-group="Концепция"].active { background: var(--концепция); }
-.pill[data-group="ИИ-производство"].active { background: var(--ии); }
-.pill[data-group="Постпродакшн"].active { background: var(--пост); }
-
-/* GANTT */
-.gantt-wrap {
-  padding: 0 48px 48px;
-  overflow-x: auto;
-}
-.gantt { min-width: 900px; }
-
-.month-header {
-  display: flex;
-  margin-left: var(--label-w);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 0;
-}
-.month-cell {
-  flex: 1;
-  font-size: 11px;
-  font-family: 'Unbounded', sans-serif;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-  text-transform: uppercase;
-  padding: 16px 0 12px;
-  text-align: center;
-  border-left: 1px solid var(--border);
-}
-.month-cell:first-child { border-left: none; }
-
-.group-label {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 20px 0 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.group-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-
-.row {
-  display: flex;
-  align-items: center;
-  height: var(--row-h);
-  border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
-}
-.row:hover { background: rgba(255,255,255,0.02); }
-
-.row-label {
-  min-width: var(--label-w);
-  width: var(--label-w);
-  flex-shrink: 0;
-  padding-right: 20px;
-}
-.row-task {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
-}
-.row-sub {
-  font-size: 10px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.timeline-bg {
-  flex: 1;
-  position: relative;
-  height: 100%;
-}
-.month-stripe {
-  position: absolute;
-  top: 0; bottom: 0;
-  border-left: 1px solid var(--border);
-}
-.bar {
-  position: absolute;
-  height: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-radius: 3px;
-  cursor: default;
-  transition: opacity 0.2s, filter 0.2s;
-}
-.bar:hover { opacity: 1 !important; filter: brightness(1.2); }
-
-/* TODAY LINE */
-.today-line {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 1px;
-  background: rgba(255,255,255,0.3);
-  z-index: 10;
-}
-.today-line::before {
-  content: 'сегодня';
-  position: absolute;
-  top: -20px;
-  left: 4px;
-  font-size: 9px;
-  color: rgba(255,255,255,0.4);
-  font-family: 'Inter', sans-serif;
-  white-space: nowrap;
-  letter-spacing: 0.05em;
-}
-
-/* LEGEND */
-.legend {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  padding: 0 48px 24px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.legend-bar {
-  width: 24px;
-  height: 4px;
-  border-radius: 2px;
-}
-
-/* STATUS DOTS */
-.status-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  margin-right: 4px;
-  vertical-align: middle;
-}
-
-/* TOOLTIP */
-.tooltip {
-  position: fixed;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 12px;
-  color: var(--text);
-  pointer-events: none;
-  z-index: 1000;
-  max-width: 260px;
-  display: none;
-  line-height: 1.6;
-}
-.tooltip-title { font-weight: 500; margin-bottom: 4px; }
-.tooltip-meta { color: var(--muted); font-size: 11px; }
-
-/* FADE IN */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.row { animation: fadeUp 0.3s ease both; }
+:root{--bg:#0a0a0a;--surface:#111;--surface2:#181818;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--text:#ececea;--muted:#555;--lw:220px;--rh:28px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+.hdr{padding:28px 40px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.hdr h1{font-family:'Unbounded',sans-serif;font-size:clamp(14px,2vw,24px);font-weight:300;letter-spacing:-.02em}
+.hdr h1 em{opacity:.3;font-style:normal}
+.hsts{display:flex;gap:22px}
+.st{font-size:10px;color:var(--muted);text-align:right}
+.st strong{display:block;font-size:15px;font-weight:400;color:var(--text);font-family:'Unbounded',sans-serif}
+.tb{padding:9px 40px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.tl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-right:2px;white-space:nowrap;flex-shrink:0}
+.ts{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.pl{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap;font-family:'Inter',sans-serif}
+.pl:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+.pl.on{color:#0a0a0a;border-color:transparent;font-weight:500}
+.pa.on{background:var(--text)}.pg1.on{background:#94a3b8}.pg2.on{background:#34d399}
+.pg3.on{background:#fb923c}.pg4.on{background:#60a5fa}.pg5.on{background:#f472b6}.ps.on{background:#e2e8f0}
+.zb{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .12s;font-family:'Inter',sans-serif}
+.zb:hover{color:var(--text)}.zb.on{background:var(--surface2);color:var(--text)}
+.sp{width:1px;height:16px;background:var(--border2);margin:0 3px;flex-shrink:0}
+.leg{padding:7px 40px;display:flex;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface)}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.ld{width:14px;height:3px;border-radius:2px}
+.go{overflow-x:auto}
+.gi{position:relative}
+.gh{display:flex;background:var(--surface);border-bottom:1px solid var(--border2);position:sticky;top:42px;z-index:150}
+.hlc{flex-shrink:0;padding:0 10px;display:flex;align-items:flex-end;padding-bottom:4px;font-size:9px;color:var(--muted);border-right:1px solid var(--border2)}
+.ht{overflow:hidden}
+.mr{display:flex}.mc{flex:none;font-size:9px;font-family:'Unbounded',sans-serif;font-weight:300;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;padding-left:6px;border-left:1px solid var(--border2);border-bottom:1px solid var(--border);height:20px}
+.wr{display:flex}.wc{flex:none;font-size:8px;color:var(--muted);display:flex;align-items:center;justify-content:center;border-left:1px solid var(--border);border-bottom:1px solid var(--border);height:16px}
+.sh{display:flex;height:34px;align-items:center;background:#0c0c0c;border-bottom:2px solid var(--border2);border-top:1px solid var(--border2)}
+.st2{flex-shrink:0;padding:0 12px;font-family:'Unbounded',sans-serif;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text);border-right:1px solid var(--border2)}
+.stl{flex:1;position:relative;height:100%}
+.er{display:flex;height:var(--rh);align-items:center;border-bottom:1px solid var(--border);transition:background .1s}
+.er:hover{background:rgba(255,255,255,0.025)}
+.el{flex-shrink:0;padding:0 10px;font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;border-right:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;gap:6px}
+.em{font-size:9px;color:#e11d48;font-weight:400;white-space:nowrap}
+.etl{flex:1;position:relative;height:100%}
+.gd{display:flex;height:28px;align-items:center;background:var(--surface2);border-bottom:1px solid var(--border)}
+.gdl{flex-shrink:0;padding:0 10px;display:flex;align-items:center;gap:6px;border-right:1px solid var(--border2)}
+.gdo{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.gdn{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.sph{display:flex;height:32px;align-items:center;background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer}
+.sph:hover{background:var(--surface2)}
+.sphl{flex-shrink:0;padding:0 10px 0 14px;display:flex;align-items:center;justify-content:space-between;gap:6px;border-right:1px solid var(--border2)}
+.spn{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap}
+.spf{font-size:9px;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+.spt{font-size:10px;color:var(--muted);flex-shrink:0;margin-left:2px}
+.sphtl{flex:1;position:relative;height:100%}
+.tr2{display:flex;height:var(--rh);align-items:center;border-bottom:1px solid var(--border);transition:background .1s}
+.tr2:hover{background:rgba(255,255,255,0.02)}
+.tlb{flex-shrink:0;padding:0 10px 0 20px;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--border)}
+.ttl{flex:1;position:relative;height:100%}
+.bar{position:absolute;height:8px;top:50%;transform:translateY(-50%);border-radius:2px;cursor:pointer;transition:filter .12s}
+.bar:hover{filter:brightness(1.4);z-index:10}
+.sbar{position:absolute;height:4px;top:50%;transform:translateY(-50%);border-radius:2px;opacity:.28;pointer-events:none}
+.mm{position:absolute;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#0a0a0a;border:2px solid #e11d48;z-index:8;cursor:pointer}
+.vl{position:absolute;top:0;bottom:0;width:1px;background:var(--border);pointer-events:none}
+.tln{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.18);z-index:15;pointer-events:none}
+#tip{position:fixed;background:#1d1d1d;border:1px solid var(--border2);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--text);pointer-events:none;z-index:9999;display:none;line-height:1.7;max-width:240px}
+#tip .tt{font-weight:600;font-size:12px;margin-bottom:2px}
+#tip .tm{color:var(--muted);font-size:10px}
+#tip .tph{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:500;margin-bottom:3px}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-left">
-    <h1>Что если<span>..</span></h1>
-    <div class="header-meta">
-      <div class="meta-item"><strong>30</strong>роликов</div>
-      <div class="meta-item"><strong>5</strong>батчей</div>
-      <div class="meta-item"><strong>48</strong>задач</div>
-      <div class="meta-item"><strong>май — окт</strong>2026</div>
-    </div>
+<div class="hdr">
+  <div><h1>Что если<em>..</em> — Production Schedule</h1></div>
+  <div class="hsts">
+    <div class="st"><strong>30</strong>роликов</div>
+    <div class="st"><strong>16</strong>специалистов</div>
+    <div class="st"><strong>май — окт</strong>2026</div>
   </div>
 </div>
-
-<div class="filters" id="filters">
-  <span class="filter-label">Группа</span>
-  <button class="pill active" data-group="all">Все</button>
-  <button class="pill" data-group="Управление">Управление</button>
-  <button class="pill" data-group="Концепция">Концепция</button>
-  <button class="pill" data-group="ИИ-производство">ИИ-производство</button>
-  <button class="pill" data-group="Постпродакшн">Постпродакшн</button>
+<div class="tb">
+  <div class="ts">
+    <span class="tl">Группа</span>
+    <button class="pl pa on" data-g="all">Все</button>
+    <button class="pl pg1" data-g="Управление">Управление</button>
+    <button class="pl pg2" data-g="Концепция">Концепция</button>
+    <button class="pl pg3" data-g="ИИ-производство">ИИ-производство</button>
+    <button class="pl pg4" data-g="Постпродакшн">Постпродакшн</button>
+    <button class="pl pg5" data-g="Согласование">Согласование</button>
+  </div>
+  <div class="sp"></div>
+  <div class="ts" id="spp"><span class="tl">Специалист</span></div>
+  <div class="sp"></div>
+  <div class="ts">
+    <span class="tl">Масштаб</span>
+    <button class="zb on" data-z="month">Месяц</button>
+    <button class="zb" data-z="week">Неделя</button>
+    <button class="zb" data-z="day">День</button>
+  </div>
 </div>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-bar" style="background:var(--управление)"></div>Управление</div>
-  <div class="legend-item"><div class="legend-bar" style="background:var(--концепция)"></div>Концепция</div>
-  <div class="legend-item"><div class="legend-bar" style="background:var(--ии)"></div>ИИ-производство</div>
-  <div class="legend-item"><div class="legend-bar" style="background:var(--пост)"></div>Постпродакшн</div>
-  <div class="legend-item"><div class="legend-bar" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.15)"></div>Не начато</div>
-  <div class="legend-item"><div class="legend-bar" style="background:rgba(255,255,255,0.6)"></div>В работе</div>
+<div class="leg">
+  <div class="li"><div class="ld" style="background:#a78bfa"></div>Сценарий</div>
+  <div class="li"><div class="ld" style="background:#fb923c"></div>Генерация</div>
+  <div class="li"><div class="ld" style="background:#f59e0b"></div>Диктор</div>
+  <div class="li"><div class="ld" style="background:#60a5fa"></div>Монтаж</div>
+  <div class="li"><div class="ld" style="background:#34d399"></div>Клин-ап/Цвет</div>
+  <div class="li"><div class="ld" style="background:#f472b6"></div>Саунд</div>
+  <div class="li"><div class="ld" style="background:#e11d48"></div>Согласование</div>
+  <div class="li"><div style="width:8px;height:8px;border-radius:50%;background:#0a0a0a;border:2px solid #e11d48;display:inline-block;vertical-align:middle"></div>&nbsp;Мастер</div>
 </div>
-
-<div class="gantt-wrap">
-  <div class="gantt" id="gantt"></div>
-</div>
-
-<div class="tooltip" id="tooltip"></div>
-
+<div class="go"><div class="gi" id="gi"></div></div>
+<div id="tip"></div>
 <script>
-const TASKS = [
-  {e:"Исполнительный продюсер",g:"Управление",t:"Ведение производства проекта",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
-  {e:"Креативный продюсер",g:"Концепция",t:"Концепция и тональность серии",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
-  {e:"Арт-директор",g:"Концепция",t:"Визуальный стиль пилота",b:"Пилот №1",s:"2026-05-08",end:"2026-05-18",st:"Не начато"},
-  {e:"Арт-директор",g:"Концепция",t:"Визуальный стиль батч 1–2",b:"Батч 1–2",s:"2026-05-18",end:"2026-07-13",st:"Не начато"},
-  {e:"Арт-директор",g:"Концепция",t:"Контроль стиля батч 3–4",b:"Батч 3–4",s:"2026-07-14",end:"2026-10-31",st:"Не начато"},
-  {e:"Главный редактор / AI редактор",g:"Концепция",t:"Редактура сценариев и фактчек",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
-  {e:"Автор сценария",g:"Концепция",t:"Сценарий пилота",b:"Пилот №1",s:"2026-05-08",end:"2026-05-12",st:"Не начато"},
-  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 1",b:"Батч 1 №2–6",s:"2026-05-18",end:"2026-06-14",st:"Не начато"},
-  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 2",b:"Батч 2 №7–12",s:"2026-06-08",end:"2026-07-13",st:"Не начато"},
-  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 3",b:"Батч 3 №13–20",s:"2026-07-07",end:"2026-08-17",st:"Не начато"},
-  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 4",b:"Батч 4 №21–30",s:"2026-08-11",end:"2026-09-14",st:"Не начато"},
-  {e:"AI-супервайзер",g:"ИИ-производство",t:"Контроль ИИ-пайплайна и качества",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
-  {e:"AI-супервайзер",g:"ИИ-производство",t:"Генерация пилота",b:"Пилот №1",s:"2026-05-13",end:"2026-05-19",st:"Не начато"},
-  {e:"HR / Поиск команды",g:"ИИ-производство",t:"Поиск промптеров",b:"—",s:"2026-05-11",end:"2026-05-31",st:"Не начато"},
-  {e:"HR / Поиск команды",g:"ИИ-производство",t:"Онбординг юнитов A+B",b:"—",s:"2026-06-01",end:"2026-06-07",st:"Не начато"},
-  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Онбординг",b:"—",s:"2026-06-01",end:"2026-06-07",st:"Не начато"},
-  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Генерация батч 1",b:"Батч 1",s:"2026-06-08",end:"2026-07-06",st:"Не начато"},
-  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Генерация батч 2",b:"Батч 2",s:"2026-07-07",end:"2026-08-03",st:"Не начато"},
-  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Генерация батч 4",b:"Батч 4",s:"2026-09-07",end:"2026-10-05",st:"Не начато"},
-  {e:"Промпт-юнит B",g:"ИИ-производство",t:"Онбординг",b:"—",s:"2026-06-01",end:"2026-06-07",st:"Не начато"},
-  {e:"Промпт-юнит B",g:"ИИ-производство",t:"Генерация батч 3",b:"Батч 3",s:"2026-08-03",end:"2026-09-07",st:"Не начато"},
-  {e:"Промпт-юнит B",г:"ИИ-производство",g:"ИИ-производство",t:"Генерация батч 4 (пар.)",b:"Батч 4",s:"2026-09-07",end:"2026-10-05",st:"Не начато"},
-  {e:"Диктор",g:"Постпродакшн",t:"Озвучка пилота",b:"Пилот №1",s:"2026-05-17",end:"2026-05-19",st:"Не начато"},
-  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 1",b:"Батч 1",s:"2026-06-15",end:"2026-06-28",st:"Не начато"},
-  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 2",b:"Батч 2",s:"2026-07-13",end:"2026-07-26",st:"Не начато"},
-  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 3",b:"Батч 3",s:"2026-08-17",end:"2026-09-07",st:"Не начато"},
-  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 4",b:"Батч 4",s:"2026-09-14",end:"2026-10-05",st:"Не начато"},
-  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
-  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 1",b:"Батч 1",s:"2026-06-29",end:"2026-07-19",st:"Не начато"},
-  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 2",b:"Батч 2",s:"2026-07-27",end:"2026-08-17",st:"Не начато"},
-  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 3",b:"Батч 3",s:"2026-09-08",end:"2026-09-28",st:"Не начато"},
-  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 4",b:"Батч 4",s:"2026-10-06",end:"2026-10-26",st:"Не начато"},
-  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
-  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 1",b:"Батч 1",s:"2026-07-06",end:"2026-07-19",st:"Не начато"},
-  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 2",b:"Батч 2",s:"2026-08-03",end:"2026-08-17",st:"Не начато"},
-  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 3",b:"Батч 3",s:"2026-09-15",end:"2026-09-28",st:"Не начато"},
-  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 4",b:"Батч 4",s:"2026-10-13",end:"2026-10-26",st:"Не начато"},
-  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
-  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 1",b:"Батч 1",s:"2026-07-06",end:"2026-07-19",st:"Не начато"},
-  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 2",b:"Батч 2",s:"2026-08-03",end:"2026-08-17",st:"Не начато"},
-  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 3",b:"Батч 3",s:"2026-09-15",end:"2026-09-28",st:"Не начато"},
-  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 4",b:"Батч 4",s:"2026-10-13",end:"2026-10-26",st:"Не начато"},
-  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
-  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 1",b:"Батч 1",s:"2026-06-29",end:"2026-07-19",st:"Не начато"},
-  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 2",b:"Батч 2",s:"2026-07-27",end:"2026-08-24",st:"Не начато"},
-  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 3",b:"Батч 3",s:"2026-09-08",end:"2026-10-05",st:"Не начато"},
-  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 4",b:"Батч 4",s:"2026-10-06",end:"2026-10-26",st:"Не начато"},
-  {e:"Композитор",g:"Постпродакшн",t:"Саундтрек серии (30 треков)",b:"Весь проект",s:"2026-05-18",end:"2026-07-06",st:"Не начато"},
-];
-
-const COLORS = {
-  "Управление":     { active: "#a78bfa", dim: "rgba(167,139,250,0.25)" },
-  "Концепция":      { active: "#34d399", dim: "rgba(52,211,153,0.25)" },
-  "ИИ-производство":{ active: "#fb923c", dim: "rgba(251,146,60,0.25)" },
-  "Постпродакшн":   { active: "#60a5fa", dim: "rgba(96,165,250,0.25)" },
-};
-const GROUP_ORDER = ["Управление","Концепция","ИИ-производство","Постпродакшн"];
-
-const START = new Date("2026-05-01");
-const END   = new Date("2026-11-01");
-const TOTAL = END - START;
-
-const months = [];
-let d = new Date(START);
-while (d < END) { months.push(new Date(d)); d.setMonth(d.getMonth()+1); }
-
-function pct(dateStr) {
-  const t = new Date(dateStr) - START;
-  return Math.max(0, Math.min(100, t / TOTAL * 100));
+const DATA={"tasks":[{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Сценарий","fio":"","start":"2026-05-08","end":"2026-05-12","color":"#a78bfa","ep":1,"pool":null,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Генерация","fio":"","start":"2026-05-12","end":"2026-05-15","color":"#fb923c","ep":1,"pool":null,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Диктор","fio":"","start":"2026-05-12","end":"2026-05-13","color":"#f59e0b","ep":1,"pool":null,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Монтаж","fio":"","start":"2026-05-18","end":"2026-05-20","color":"#60a5fa","ep":1,"pool":null,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Клин-ап/Цвет","fio":"","start":"2026-05-20","end":"2026-05-21","color":"#34d399","ep":1,"pool":null,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Саунд","fio":"","start":"2026-05-20","end":"2026-05-21","color":"#f472b6","ep":1,"pool":null,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №1 (пилот) — Согласование","fio":"","start":"2026-05-21","end":"2026-05-25","color":"#e11d48","ep":1,"pool":null,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Сценарий","fio":"","start":"2026-06-01","end":"2026-06-02","color":"#a78bfa","ep":2,"pool":1,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Генерация","fio":"","start":"2026-06-03","end":"2026-06-05","color":"#fb923c","ep":2,"pool":1,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Диктор","fio":"","start":"2026-06-16","end":"2026-06-18","color":"#f59e0b","ep":2,"pool":1,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Монтаж","fio":"","start":"2026-06-08","end":"2026-06-09","color":"#60a5fa","ep":2,"pool":1,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Клин-ап/Цвет","fio":"","start":"2026-06-10","end":"2026-06-11","color":"#34d399","ep":2,"pool":1,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Саунд","fio":"","start":"2026-06-15","end":"2026-06-15","color":"#f472b6","ep":2,"pool":1,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №2 — Согласование","fio":"","start":"2026-07-02","end":"2026-07-09","color":"#e11d48","ep":2,"pool":1,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Сценарий","fio":"","start":"2026-06-03","end":"2026-06-04","color":"#a78bfa","ep":3,"pool":1,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Генерация","fio":"","start":"2026-06-08","end":"2026-06-10","color":"#fb923c","ep":3,"pool":1,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Диктор","fio":"","start":"2026-06-16","end":"2026-06-18","color":"#f59e0b","ep":3,"pool":1,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Монтаж","fio":"","start":"2026-06-11","end":"2026-06-15","color":"#60a5fa","ep":3,"pool":1,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Клин-ап/Цвет","fio":"","start":"2026-06-16","end":"2026-06-17","color":"#34d399","ep":3,"pool":1,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Саунд","fio":"","start":"2026-06-18","end":"2026-06-18","color":"#f472b6","ep":3,"pool":1,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №3 — Согласование","fio":"","start":"2026-07-02","end":"2026-07-09","color":"#e11d48","ep":3,"pool":1,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Сценарий","fio":"","start":"2026-06-05","end":"2026-06-08","color":"#a78bfa","ep":4,"pool":1,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Генерация","fio":"","start":"2026-06-11","end":"2026-06-16","color":"#fb923c","ep":4,"pool":1,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Диктор","fio":"","start":"2026-06-16","end":"2026-06-18","color":"#f59e0b","ep":4,"pool":1,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Монтаж","fio":"","start":"2026-06-17","end":"2026-06-18","color":"#60a5fa","ep":4,"pool":1,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Клин-ап/Цвет","fio":"","start":"2026-06-19","end":"2026-06-22","color":"#34d399","ep":4,"pool":1,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Саунд","fio":"","start":"2026-06-23","end":"2026-06-23","color":"#f472b6","ep":4,"pool":1,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №4 — Согласование","fio":"","start":"2026-07-02","end":"2026-07-09","color":"#e11d48","ep":4,"pool":1,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Сценарий","fio":"","start":"2026-06-09","end":"2026-06-10","color":"#a78bfa","ep":5,"pool":1,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Генерация","fio":"","start":"2026-06-17","end":"2026-06-19","color":"#fb923c","ep":5,"pool":1,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Диктор","fio":"","start":"2026-06-16","end":"2026-06-18","color":"#f59e0b","ep":5,"pool":1,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Монтаж","fio":"","start":"2026-06-22","end":"2026-06-23","color":"#60a5fa","ep":5,"pool":1,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Клин-ап/Цвет","fio":"","start":"2026-06-24","end":"2026-06-25","color":"#34d399","ep":5,"pool":1,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Саунд","fio":"","start":"2026-06-26","end":"2026-06-26","color":"#f472b6","ep":5,"pool":1,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №5 — Согласование","fio":"","start":"2026-07-02","end":"2026-07-09","color":"#e11d48","ep":5,"pool":1,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Сценарий","fio":"","start":"2026-06-11","end":"2026-06-15","color":"#a78bfa","ep":6,"pool":1,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Генерация","fio":"","start":"2026-06-22","end":"2026-06-24","color":"#fb923c","ep":6,"pool":1,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Диктор","fio":"","start":"2026-06-16","end":"2026-06-18","color":"#f59e0b","ep":6,"pool":1,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Монтаж","fio":"","start":"2026-06-25","end":"2026-06-26","color":"#60a5fa","ep":6,"pool":1,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Клин-ап/Цвет","fio":"","start":"2026-06-29","end":"2026-06-30","color":"#34d399","ep":6,"pool":1,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Саунд","fio":"","start":"2026-07-01","end":"2026-07-01","color":"#f472b6","ep":6,"pool":1,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №6 — Согласование","fio":"","start":"2026-07-02","end":"2026-07-09","color":"#e11d48","ep":6,"pool":1,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Сценарий","fio":"","start":"2026-06-16","end":"2026-06-17","color":"#a78bfa","ep":7,"pool":2,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Генерация","fio":"","start":"2026-06-25","end":"2026-06-29","color":"#fb923c","ep":7,"pool":2,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Диктор","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#f59e0b","ep":7,"pool":2,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Монтаж","fio":"","start":"2026-06-30","end":"2026-07-01","color":"#60a5fa","ep":7,"pool":2,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Клин-ап/Цвет","fio":"","start":"2026-07-02","end":"2026-07-03","color":"#34d399","ep":7,"pool":2,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Саунд","fio":"","start":"2026-07-06","end":"2026-07-06","color":"#f472b6","ep":7,"pool":2,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №7 — Согласование","fio":"","start":"2026-07-23","end":"2026-07-30","color":"#e11d48","ep":7,"pool":2,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Сценарий","fio":"","start":"2026-06-18","end":"2026-06-19","color":"#a78bfa","ep":8,"pool":2,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Генерация","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#fb923c","ep":8,"pool":2,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Диктор","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#f59e0b","ep":8,"pool":2,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Монтаж","fio":"","start":"2026-07-03","end":"2026-07-06","color":"#60a5fa","ep":8,"pool":2,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Клин-ап/Цвет","fio":"","start":"2026-07-07","end":"2026-07-08","color":"#34d399","ep":8,"pool":2,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Саунд","fio":"","start":"2026-07-09","end":"2026-07-09","color":"#f472b6","ep":8,"pool":2,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №8 — Согласование","fio":"","start":"2026-07-23","end":"2026-07-30","color":"#e11d48","ep":8,"pool":2,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Сценарий","fio":"","start":"2026-06-22","end":"2026-06-23","color":"#a78bfa","ep":9,"pool":2,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Генерация","fio":"","start":"2026-07-03","end":"2026-07-07","color":"#fb923c","ep":9,"pool":2,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Диктор","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#f59e0b","ep":9,"pool":2,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Монтаж","fio":"","start":"2026-07-08","end":"2026-07-09","color":"#60a5fa","ep":9,"pool":2,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Клин-ап/Цвет","fio":"","start":"2026-07-10","end":"2026-07-13","color":"#34d399","ep":9,"pool":2,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Саунд","fio":"","start":"2026-07-14","end":"2026-07-14","color":"#f472b6","ep":9,"pool":2,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №9 — Согласование","fio":"","start":"2026-07-23","end":"2026-07-30","color":"#e11d48","ep":9,"pool":2,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Сценарий","fio":"","start":"2026-06-24","end":"2026-06-25","color":"#a78bfa","ep":10,"pool":2,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Генерация","fio":"","start":"2026-07-08","end":"2026-07-10","color":"#fb923c","ep":10,"pool":2,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Диктор","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#f59e0b","ep":10,"pool":2,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Монтаж","fio":"","start":"2026-07-13","end":"2026-07-14","color":"#60a5fa","ep":10,"pool":2,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Клин-ап/Цвет","fio":"","start":"2026-07-15","end":"2026-07-16","color":"#34d399","ep":10,"pool":2,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Саунд","fio":"","start":"2026-07-17","end":"2026-07-17","color":"#f472b6","ep":10,"pool":2,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №10 — Согласование","fio":"","start":"2026-07-23","end":"2026-07-30","color":"#e11d48","ep":10,"pool":2,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Сценарий","fio":"","start":"2026-06-26","end":"2026-06-29","color":"#a78bfa","ep":11,"pool":2,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Генерация","fio":"","start":"2026-07-13","end":"2026-07-15","color":"#fb923c","ep":11,"pool":2,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Диктор","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#f59e0b","ep":11,"pool":2,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Монтаж","fio":"","start":"2026-07-16","end":"2026-07-17","color":"#60a5fa","ep":11,"pool":2,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Клин-ап/Цвет","fio":"","start":"2026-07-20","end":"2026-07-21","color":"#34d399","ep":11,"pool":2,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Саунд","fio":"","start":"2026-07-22","end":"2026-07-22","color":"#f472b6","ep":11,"pool":2,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №11 — Согласование","fio":"","start":"2026-07-23","end":"2026-07-30","color":"#e11d48","ep":11,"pool":2,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Сценарий","fio":"","start":"2026-06-30","end":"2026-07-01","color":"#a78bfa","ep":12,"pool":3,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Генерация","fio":"","start":"2026-07-16","end":"2026-07-20","color":"#fb923c","ep":12,"pool":3,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Диктор","fio":"","start":"2026-07-14","end":"2026-07-16","color":"#f59e0b","ep":12,"pool":3,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Монтаж","fio":"","start":"2026-07-21","end":"2026-07-22","color":"#60a5fa","ep":12,"pool":3,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Клин-ап/Цвет","fio":"","start":"2026-07-23","end":"2026-07-24","color":"#34d399","ep":12,"pool":3,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Саунд","fio":"","start":"2026-07-27","end":"2026-07-27","color":"#f472b6","ep":12,"pool":3,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №12 — Согласование","fio":"","start":"2026-08-13","end":"2026-08-20","color":"#e11d48","ep":12,"pool":3,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Сценарий","fio":"","start":"2026-07-02","end":"2026-07-03","color":"#a78bfa","ep":13,"pool":3,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Генерация","fio":"","start":"2026-07-21","end":"2026-07-23","color":"#fb923c","ep":13,"pool":3,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Диктор","fio":"","start":"2026-07-14","end":"2026-07-16","color":"#f59e0b","ep":13,"pool":3,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Монтаж","fio":"","start":"2026-07-24","end":"2026-07-27","color":"#60a5fa","ep":13,"pool":3,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Клин-ап/Цвет","fio":"","start":"2026-07-28","end":"2026-07-29","color":"#34d399","ep":13,"pool":3,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Саунд","fio":"","start":"2026-07-30","end":"2026-07-30","color":"#f472b6","ep":13,"pool":3,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №13 — Согласование","fio":"","start":"2026-08-13","end":"2026-08-20","color":"#e11d48","ep":13,"pool":3,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Сценарий","fio":"","start":"2026-07-06","end":"2026-07-07","color":"#a78bfa","ep":14,"pool":3,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Генерация","fio":"","start":"2026-07-24","end":"2026-07-28","color":"#fb923c","ep":14,"pool":3,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Диктор","fio":"","start":"2026-07-14","end":"2026-07-16","color":"#f59e0b","ep":14,"pool":3,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Монтаж","fio":"","start":"2026-07-29","end":"2026-07-30","color":"#60a5fa","ep":14,"pool":3,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Клин-ап/Цвет","fio":"","start":"2026-07-31","end":"2026-08-03","color":"#34d399","ep":14,"pool":3,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Саунд","fio":"","start":"2026-08-04","end":"2026-08-04","color":"#f472b6","ep":14,"pool":3,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №14 — Согласование","fio":"","start":"2026-08-13","end":"2026-08-20","color":"#e11d48","ep":14,"pool":3,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Сценарий","fio":"","start":"2026-07-08","end":"2026-07-09","color":"#a78bfa","ep":15,"pool":3,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Генерация","fio":"","start":"2026-07-29","end":"2026-07-31","color":"#fb923c","ep":15,"pool":3,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Диктор","fio":"","start":"2026-07-14","end":"2026-07-16","color":"#f59e0b","ep":15,"pool":3,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Монтаж","fio":"","start":"2026-08-03","end":"2026-08-04","color":"#60a5fa","ep":15,"pool":3,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Клин-ап/Цвет","fio":"","start":"2026-08-05","end":"2026-08-06","color":"#34d399","ep":15,"pool":3,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Саунд","fio":"","start":"2026-08-07","end":"2026-08-07","color":"#f472b6","ep":15,"pool":3,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №15 — Согласование","fio":"","start":"2026-08-13","end":"2026-08-20","color":"#e11d48","ep":15,"pool":3,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Сценарий","fio":"","start":"2026-07-10","end":"2026-07-13","color":"#a78bfa","ep":16,"pool":3,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Генерация","fio":"","start":"2026-08-03","end":"2026-08-05","color":"#fb923c","ep":16,"pool":3,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Диктор","fio":"","start":"2026-07-14","end":"2026-07-16","color":"#f59e0b","ep":16,"pool":3,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Монтаж","fio":"","start":"2026-08-06","end":"2026-08-07","color":"#60a5fa","ep":16,"pool":3,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Клин-ап/Цвет","fio":"","start":"2026-08-10","end":"2026-08-11","color":"#34d399","ep":16,"pool":3,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Саунд","fio":"","start":"2026-08-12","end":"2026-08-12","color":"#f472b6","ep":16,"pool":3,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №16 — Согласование","fio":"","start":"2026-08-13","end":"2026-08-20","color":"#e11d48","ep":16,"pool":3,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Сценарий","fio":"","start":"2026-07-14","end":"2026-07-15","color":"#a78bfa","ep":17,"pool":4,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Генерация","fio":"","start":"2026-08-06","end":"2026-08-10","color":"#fb923c","ep":17,"pool":4,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Диктор","fio":"","start":"2026-07-28","end":"2026-07-30","color":"#f59e0b","ep":17,"pool":4,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Монтаж","fio":"","start":"2026-08-11","end":"2026-08-12","color":"#60a5fa","ep":17,"pool":4,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Клин-ап/Цвет","fio":"","start":"2026-08-13","end":"2026-08-14","color":"#34d399","ep":17,"pool":4,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Саунд","fio":"","start":"2026-08-17","end":"2026-08-17","color":"#f472b6","ep":17,"pool":4,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №17 — Согласование","fio":"","start":"2026-09-03","end":"2026-09-10","color":"#e11d48","ep":17,"pool":4,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Сценарий","fio":"","start":"2026-07-16","end":"2026-07-17","color":"#a78bfa","ep":18,"pool":4,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Генерация","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#fb923c","ep":18,"pool":4,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Диктор","fio":"","start":"2026-07-28","end":"2026-07-30","color":"#f59e0b","ep":18,"pool":4,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Монтаж","fio":"","start":"2026-08-14","end":"2026-08-17","color":"#60a5fa","ep":18,"pool":4,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Клин-ап/Цвет","fio":"","start":"2026-08-18","end":"2026-08-19","color":"#34d399","ep":18,"pool":4,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Саунд","fio":"","start":"2026-08-20","end":"2026-08-20","color":"#f472b6","ep":18,"pool":4,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №18 — Согласование","fio":"","start":"2026-09-03","end":"2026-09-10","color":"#e11d48","ep":18,"pool":4,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Сценарий","fio":"","start":"2026-07-20","end":"2026-07-21","color":"#a78bfa","ep":19,"pool":4,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Генерация","fio":"","start":"2026-08-14","end":"2026-08-18","color":"#fb923c","ep":19,"pool":4,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Диктор","fio":"","start":"2026-07-28","end":"2026-07-30","color":"#f59e0b","ep":19,"pool":4,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Монтаж","fio":"","start":"2026-08-19","end":"2026-08-20","color":"#60a5fa","ep":19,"pool":4,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Клин-ап/Цвет","fio":"","start":"2026-08-21","end":"2026-08-24","color":"#34d399","ep":19,"pool":4,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Саунд","fio":"","start":"2026-08-25","end":"2026-08-25","color":"#f472b6","ep":19,"pool":4,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №19 — Согласование","fio":"","start":"2026-09-03","end":"2026-09-10","color":"#e11d48","ep":19,"pool":4,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Сценарий","fio":"","start":"2026-07-22","end":"2026-07-23","color":"#a78bfa","ep":20,"pool":4,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Генерация","fio":"","start":"2026-08-19","end":"2026-08-21","color":"#fb923c","ep":20,"pool":4,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Диктор","fio":"","start":"2026-07-28","end":"2026-07-30","color":"#f59e0b","ep":20,"pool":4,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Монтаж","fio":"","start":"2026-08-24","end":"2026-08-25","color":"#60a5fa","ep":20,"pool":4,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Клин-ап/Цвет","fio":"","start":"2026-08-26","end":"2026-08-27","color":"#34d399","ep":20,"pool":4,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Саунд","fio":"","start":"2026-08-28","end":"2026-08-28","color":"#f472b6","ep":20,"pool":4,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №20 — Согласование","fio":"","start":"2026-09-03","end":"2026-09-10","color":"#e11d48","ep":20,"pool":4,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Сценарий","fio":"","start":"2026-07-24","end":"2026-07-27","color":"#a78bfa","ep":21,"pool":4,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Генерация","fio":"","start":"2026-08-24","end":"2026-08-26","color":"#fb923c","ep":21,"pool":4,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Диктор","fio":"","start":"2026-07-28","end":"2026-07-30","color":"#f59e0b","ep":21,"pool":4,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Монтаж","fio":"","start":"2026-08-27","end":"2026-08-28","color":"#60a5fa","ep":21,"pool":4,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Клин-ап/Цвет","fio":"","start":"2026-08-31","end":"2026-09-01","color":"#34d399","ep":21,"pool":4,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Саунд","fio":"","start":"2026-09-02","end":"2026-09-02","color":"#f472b6","ep":21,"pool":4,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №21 — Согласование","fio":"","start":"2026-09-03","end":"2026-09-10","color":"#e11d48","ep":21,"pool":4,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Сценарий","fio":"","start":"2026-07-28","end":"2026-07-29","color":"#a78bfa","ep":22,"pool":5,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Генерация","fio":"","start":"2026-08-27","end":"2026-08-31","color":"#fb923c","ep":22,"pool":5,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Диктор","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#f59e0b","ep":22,"pool":5,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Монтаж","fio":"","start":"2026-09-01","end":"2026-09-02","color":"#60a5fa","ep":22,"pool":5,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Клин-ап/Цвет","fio":"","start":"2026-09-03","end":"2026-09-04","color":"#34d399","ep":22,"pool":5,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Саунд","fio":"","start":"2026-09-07","end":"2026-09-07","color":"#f472b6","ep":22,"pool":5,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №22 — Согласование","fio":"","start":"2026-09-24","end":"2026-10-01","color":"#e11d48","ep":22,"pool":5,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Сценарий","fio":"","start":"2026-07-30","end":"2026-07-31","color":"#a78bfa","ep":23,"pool":5,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Генерация","fio":"","start":"2026-09-01","end":"2026-09-03","color":"#fb923c","ep":23,"pool":5,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Диктор","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#f59e0b","ep":23,"pool":5,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Монтаж","fio":"","start":"2026-09-04","end":"2026-09-07","color":"#60a5fa","ep":23,"pool":5,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Клин-ап/Цвет","fio":"","start":"2026-09-08","end":"2026-09-09","color":"#34d399","ep":23,"pool":5,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Саунд","fio":"","start":"2026-09-10","end":"2026-09-10","color":"#f472b6","ep":23,"pool":5,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №23 — Согласование","fio":"","start":"2026-09-24","end":"2026-10-01","color":"#e11d48","ep":23,"pool":5,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Сценарий","fio":"","start":"2026-08-03","end":"2026-08-04","color":"#a78bfa","ep":24,"pool":5,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Генерация","fio":"","start":"2026-09-04","end":"2026-09-08","color":"#fb923c","ep":24,"pool":5,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Диктор","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#f59e0b","ep":24,"pool":5,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Монтаж","fio":"","start":"2026-09-09","end":"2026-09-10","color":"#60a5fa","ep":24,"pool":5,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Клин-ап/Цвет","fio":"","start":"2026-09-11","end":"2026-09-14","color":"#34d399","ep":24,"pool":5,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Саунд","fio":"","start":"2026-09-15","end":"2026-09-15","color":"#f472b6","ep":24,"pool":5,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №24 — Согласование","fio":"","start":"2026-09-24","end":"2026-10-01","color":"#e11d48","ep":24,"pool":5,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Сценарий","fio":"","start":"2026-08-05","end":"2026-08-06","color":"#a78bfa","ep":25,"pool":5,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Генерация","fio":"","start":"2026-09-09","end":"2026-09-11","color":"#fb923c","ep":25,"pool":5,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Диктор","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#f59e0b","ep":25,"pool":5,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Монтаж","fio":"","start":"2026-09-14","end":"2026-09-15","color":"#60a5fa","ep":25,"pool":5,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Клин-ап/Цвет","fio":"","start":"2026-09-16","end":"2026-09-17","color":"#34d399","ep":25,"pool":5,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Саунд","fio":"","start":"2026-09-18","end":"2026-09-18","color":"#f472b6","ep":25,"pool":5,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №25 — Согласование","fio":"","start":"2026-09-24","end":"2026-10-01","color":"#e11d48","ep":25,"pool":5,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Сценарий","fio":"","start":"2026-08-07","end":"2026-08-10","color":"#a78bfa","ep":26,"pool":5,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Генерация","fio":"","start":"2026-09-14","end":"2026-09-16","color":"#fb923c","ep":26,"pool":5,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Диктор","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#f59e0b","ep":26,"pool":5,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Монтаж","fio":"","start":"2026-09-17","end":"2026-09-18","color":"#60a5fa","ep":26,"pool":5,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Клин-ап/Цвет","fio":"","start":"2026-09-21","end":"2026-09-22","color":"#34d399","ep":26,"pool":5,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Саунд","fio":"","start":"2026-09-23","end":"2026-09-23","color":"#f472b6","ep":26,"pool":5,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №26 — Согласование","fio":"","start":"2026-09-24","end":"2026-10-01","color":"#e11d48","ep":26,"pool":5,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Сценарий","fio":"","start":"2026-08-11","end":"2026-08-12","color":"#a78bfa","ep":27,"pool":6,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Генерация","fio":"","start":"2026-09-17","end":"2026-09-21","color":"#fb923c","ep":27,"pool":6,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Диктор","fio":"","start":"2026-08-21","end":"2026-08-25","color":"#f59e0b","ep":27,"pool":6,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Монтаж","fio":"","start":"2026-09-22","end":"2026-09-23","color":"#60a5fa","ep":27,"pool":6,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Клин-ап/Цвет","fio":"","start":"2026-09-24","end":"2026-09-25","color":"#34d399","ep":27,"pool":6,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Саунд","fio":"","start":"2026-09-28","end":"2026-09-28","color":"#f472b6","ep":27,"pool":6,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №27 — Согласование","fio":"","start":"2026-10-12","end":"2026-10-19","color":"#e11d48","ep":27,"pool":6,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Сценарий","fio":"","start":"2026-08-13","end":"2026-08-14","color":"#a78bfa","ep":28,"pool":6,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Генерация","fio":"","start":"2026-09-22","end":"2026-09-24","color":"#fb923c","ep":28,"pool":6,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Диктор","fio":"","start":"2026-08-21","end":"2026-08-25","color":"#f59e0b","ep":28,"pool":6,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Монтаж","fio":"","start":"2026-09-25","end":"2026-09-28","color":"#60a5fa","ep":28,"pool":6,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Клин-ап/Цвет","fio":"","start":"2026-09-29","end":"2026-09-30","color":"#34d399","ep":28,"pool":6,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Саунд","fio":"","start":"2026-10-01","end":"2026-10-01","color":"#f472b6","ep":28,"pool":6,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №28 — Согласование","fio":"","start":"2026-10-12","end":"2026-10-19","color":"#e11d48","ep":28,"pool":6,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Сценарий","fio":"","start":"2026-08-17","end":"2026-08-18","color":"#a78bfa","ep":29,"pool":6,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Генерация","fio":"","start":"2026-09-25","end":"2026-09-29","color":"#fb923c","ep":29,"pool":6,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Диктор","fio":"","start":"2026-08-21","end":"2026-08-25","color":"#f59e0b","ep":29,"pool":6,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Монтаж","fio":"","start":"2026-09-30","end":"2026-10-01","color":"#60a5fa","ep":29,"pool":6,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Клин-ап/Цвет","fio":"","start":"2026-10-02","end":"2026-10-05","color":"#34d399","ep":29,"pool":6,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Саунд","fio":"","start":"2026-10-06","end":"2026-10-06","color":"#f472b6","ep":29,"pool":6,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №29 — Согласование","fio":"","start":"2026-10-12","end":"2026-10-19","color":"#e11d48","ep":29,"pool":6,"phase":"approval"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Сценарий","fio":"","start":"2026-08-19","end":"2026-08-20","color":"#a78bfa","ep":30,"pool":6,"phase":"script"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Генерация","fio":"","start":"2026-09-30","end":"2026-10-02","color":"#fb923c","ep":30,"pool":6,"phase":"gen"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Диктор","fio":"","start":"2026-08-21","end":"2026-08-25","color":"#f59e0b","ep":30,"pool":6,"phase":"voice"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Монтаж","fio":"","start":"2026-10-05","end":"2026-10-06","color":"#60a5fa","ep":30,"pool":6,"phase":"edit"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Клин-ап/Цвет","fio":"","start":"2026-10-07","end":"2026-10-08","color":"#34d399","ep":30,"pool":6,"phase":"clean"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Саунд","fio":"","start":"2026-10-09","end":"2026-10-09","color":"#f472b6","ep":30,"pool":6,"phase":"sound"},{"specialist":"__ep__","group":"Ролики","name":"Ролик №30 — Согласование","fio":"","start":"2026-10-12","end":"2026-10-19","color":"#e11d48","ep":30,"pool":6,"phase":"approval"},{"specialist":"HR / Поиск команды","group":"Управление","name":"Поиск специалистов","fio":"","start":"2026-05-12","end":"2026-06-01","color":"#94a3b8","ep":null,"pool":null,"phase":null},{"specialist":"HR / Поиск команды","group":"Управление","name":"Онбординг команды","fio":"","start":"2026-06-01","end":"2026-06-05","color":"#94a3b8","ep":null,"pool":null,"phase":null},{"specialist":"Генеральный директор","group":"Управление","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#94a3b8","ep":null,"pool":null,"phase":null},{"specialist":"Руководитель проекта","group":"Управление","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#94a3b8","ep":null,"pool":null,"phase":null},{"specialist":"Генеральный продюсер","group":"Управление","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#94a3b8","ep":null,"pool":null,"phase":null},{"specialist":"Исполнительный продюсер","group":"Управление","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#94a3b8","ep":null,"pool":null,"phase":null},{"specialist":"Креативный продюсер","group":"Концепция","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#34d399","ep":null,"pool":null,"phase":null},{"specialist":"Арт-директор","group":"Концепция","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#34d399","ep":null,"pool":null,"phase":null},{"specialist":"Гл. редактор / AI редактор","group":"Концепция","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#34d399","ep":null,"pool":null,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-08","end":"2026-05-12","color":"#34d399","ep":1,"pool":null,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №2","fio":"","start":"2026-06-01","end":"2026-06-02","color":"#34d399","ep":2,"pool":1,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №3","fio":"","start":"2026-06-03","end":"2026-06-04","color":"#34d399","ep":3,"pool":1,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №4","fio":"","start":"2026-06-05","end":"2026-06-08","color":"#34d399","ep":4,"pool":1,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №5","fio":"","start":"2026-06-09","end":"2026-06-10","color":"#34d399","ep":5,"pool":1,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №6","fio":"","start":"2026-06-11","end":"2026-06-15","color":"#34d399","ep":6,"pool":1,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №7","fio":"","start":"2026-06-16","end":"2026-06-17","color":"#34d399","ep":7,"pool":2,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №8","fio":"","start":"2026-06-18","end":"2026-06-19","color":"#34d399","ep":8,"pool":2,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №9","fio":"","start":"2026-06-22","end":"2026-06-23","color":"#34d399","ep":9,"pool":2,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №10","fio":"","start":"2026-06-24","end":"2026-06-25","color":"#34d399","ep":10,"pool":2,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №11","fio":"","start":"2026-06-26","end":"2026-06-29","color":"#34d399","ep":11,"pool":2,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №12","fio":"","start":"2026-06-30","end":"2026-07-01","color":"#34d399","ep":12,"pool":3,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №13","fio":"","start":"2026-07-02","end":"2026-07-03","color":"#34d399","ep":13,"pool":3,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №14","fio":"","start":"2026-07-06","end":"2026-07-07","color":"#34d399","ep":14,"pool":3,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №15","fio":"","start":"2026-07-08","end":"2026-07-09","color":"#34d399","ep":15,"pool":3,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №16","fio":"","start":"2026-07-10","end":"2026-07-13","color":"#34d399","ep":16,"pool":3,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №17","fio":"","start":"2026-07-14","end":"2026-07-15","color":"#34d399","ep":17,"pool":4,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №18","fio":"","start":"2026-07-16","end":"2026-07-17","color":"#34d399","ep":18,"pool":4,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №19","fio":"","start":"2026-07-20","end":"2026-07-21","color":"#34d399","ep":19,"pool":4,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №20","fio":"","start":"2026-07-22","end":"2026-07-23","color":"#34d399","ep":20,"pool":4,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №21","fio":"","start":"2026-07-24","end":"2026-07-27","color":"#34d399","ep":21,"pool":4,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №22","fio":"","start":"2026-07-28","end":"2026-07-29","color":"#34d399","ep":22,"pool":5,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №23","fio":"","start":"2026-07-30","end":"2026-07-31","color":"#34d399","ep":23,"pool":5,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №24","fio":"","start":"2026-08-03","end":"2026-08-04","color":"#34d399","ep":24,"pool":5,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №25","fio":"","start":"2026-08-05","end":"2026-08-06","color":"#34d399","ep":25,"pool":5,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №26","fio":"","start":"2026-08-07","end":"2026-08-10","color":"#34d399","ep":26,"pool":5,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №27","fio":"","start":"2026-08-11","end":"2026-08-12","color":"#34d399","ep":27,"pool":6,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №28","fio":"","start":"2026-08-13","end":"2026-08-14","color":"#34d399","ep":28,"pool":6,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №29","fio":"","start":"2026-08-17","end":"2026-08-18","color":"#34d399","ep":29,"pool":6,"phase":null},{"specialist":"Автор сценария","group":"Концепция","name":"Ролик №30","fio":"","start":"2026-08-19","end":"2026-08-20","color":"#34d399","ep":30,"pool":6,"phase":null},{"specialist":"AI-супервайзер","group":"ИИ-производство","name":"Весь проект","fio":"","start":"2026-05-08","end":"2026-10-19","color":"#fb923c","ep":null,"pool":null,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-12","end":"2026-05-15","color":"#fb923c","ep":1,"pool":null,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №2","fio":"","start":"2026-06-03","end":"2026-06-05","color":"#fb923c","ep":2,"pool":1,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №3","fio":"","start":"2026-06-08","end":"2026-06-10","color":"#fb923c","ep":3,"pool":1,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №4","fio":"","start":"2026-06-11","end":"2026-06-16","color":"#fb923c","ep":4,"pool":1,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №5","fio":"","start":"2026-06-17","end":"2026-06-19","color":"#fb923c","ep":5,"pool":1,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №6","fio":"","start":"2026-06-22","end":"2026-06-24","color":"#fb923c","ep":6,"pool":1,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №7","fio":"","start":"2026-06-25","end":"2026-06-29","color":"#fb923c","ep":7,"pool":2,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №8","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#fb923c","ep":8,"pool":2,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №9","fio":"","start":"2026-07-03","end":"2026-07-07","color":"#fb923c","ep":9,"pool":2,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №10","fio":"","start":"2026-07-08","end":"2026-07-10","color":"#fb923c","ep":10,"pool":2,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №11","fio":"","start":"2026-07-13","end":"2026-07-15","color":"#fb923c","ep":11,"pool":2,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №12","fio":"","start":"2026-07-16","end":"2026-07-20","color":"#fb923c","ep":12,"pool":3,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №13","fio":"","start":"2026-07-21","end":"2026-07-23","color":"#fb923c","ep":13,"pool":3,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №14","fio":"","start":"2026-07-24","end":"2026-07-28","color":"#fb923c","ep":14,"pool":3,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №15","fio":"","start":"2026-07-29","end":"2026-07-31","color":"#fb923c","ep":15,"pool":3,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №16","fio":"","start":"2026-08-03","end":"2026-08-05","color":"#fb923c","ep":16,"pool":3,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №17","fio":"","start":"2026-08-06","end":"2026-08-10","color":"#fb923c","ep":17,"pool":4,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №18","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#fb923c","ep":18,"pool":4,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №19","fio":"","start":"2026-08-14","end":"2026-08-18","color":"#fb923c","ep":19,"pool":4,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №20","fio":"","start":"2026-08-19","end":"2026-08-21","color":"#fb923c","ep":20,"pool":4,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №21","fio":"","start":"2026-08-24","end":"2026-08-26","color":"#fb923c","ep":21,"pool":4,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №22","fio":"","start":"2026-08-27","end":"2026-08-31","color":"#fb923c","ep":22,"pool":5,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №23","fio":"","start":"2026-09-01","end":"2026-09-03","color":"#fb923c","ep":23,"pool":5,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №24","fio":"","start":"2026-09-04","end":"2026-09-08","color":"#fb923c","ep":24,"pool":5,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №25","fio":"","start":"2026-09-09","end":"2026-09-11","color":"#fb923c","ep":25,"pool":5,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №26","fio":"","start":"2026-09-14","end":"2026-09-16","color":"#fb923c","ep":26,"pool":5,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №27","fio":"","start":"2026-09-17","end":"2026-09-21","color":"#fb923c","ep":27,"pool":6,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №28","fio":"","start":"2026-09-22","end":"2026-09-24","color":"#fb923c","ep":28,"pool":6,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №29","fio":"","start":"2026-09-25","end":"2026-09-29","color":"#fb923c","ep":29,"pool":6,"phase":null},{"specialist":"Промпт-инженер / AI художник","group":"ИИ-производство","name":"Ролик №30","fio":"","start":"2026-09-30","end":"2026-10-02","color":"#fb923c","ep":30,"pool":6,"phase":null},{"specialist":"Композитор","group":"Постпродакшн","name":"Саундтрек серии","fio":"","start":"2026-05-18","end":"2026-06-30","color":"#60a5fa","ep":null,"pool":null,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-12","end":"2026-05-13","color":"#60a5fa","ep":1,"pool":null,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Пул №1 (ролики 2–6)","fio":"","start":"2026-06-16","end":"2026-06-18","color":"#60a5fa","ep":null,"pool":1,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Пул №2 (ролики 7–11)","fio":"","start":"2026-06-30","end":"2026-07-02","color":"#60a5fa","ep":null,"pool":2,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Пул №3 (ролики 12–16)","fio":"","start":"2026-07-14","end":"2026-07-16","color":"#60a5fa","ep":null,"pool":3,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Пул №4 (ролики 17–21)","fio":"","start":"2026-07-28","end":"2026-07-30","color":"#60a5fa","ep":null,"pool":4,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Пул №5 (ролики 22–26)","fio":"","start":"2026-08-11","end":"2026-08-13","color":"#60a5fa","ep":null,"pool":5,"phase":null},{"specialist":"Диктор","group":"Постпродакшн","name":"Пул №6 (ролики 27–30)","fio":"","start":"2026-08-21","end":"2026-08-25","color":"#60a5fa","ep":null,"pool":6,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-18","end":"2026-05-20","color":"#60a5fa","ep":1,"pool":null,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №2","fio":"","start":"2026-06-08","end":"2026-06-09","color":"#60a5fa","ep":2,"pool":1,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №3","fio":"","start":"2026-06-11","end":"2026-06-15","color":"#60a5fa","ep":3,"pool":1,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №4","fio":"","start":"2026-06-17","end":"2026-06-18","color":"#60a5fa","ep":4,"pool":1,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №5","fio":"","start":"2026-06-22","end":"2026-06-23","color":"#60a5fa","ep":5,"pool":1,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №6","fio":"","start":"2026-06-25","end":"2026-06-26","color":"#60a5fa","ep":6,"pool":1,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №7","fio":"","start":"2026-06-30","end":"2026-07-01","color":"#60a5fa","ep":7,"pool":2,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №8","fio":"","start":"2026-07-03","end":"2026-07-06","color":"#60a5fa","ep":8,"pool":2,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №9","fio":"","start":"2026-07-08","end":"2026-07-09","color":"#60a5fa","ep":9,"pool":2,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №10","fio":"","start":"2026-07-13","end":"2026-07-14","color":"#60a5fa","ep":10,"pool":2,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №11","fio":"","start":"2026-07-16","end":"2026-07-17","color":"#60a5fa","ep":11,"pool":2,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №12","fio":"","start":"2026-07-21","end":"2026-07-22","color":"#60a5fa","ep":12,"pool":3,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №13","fio":"","start":"2026-07-24","end":"2026-07-27","color":"#60a5fa","ep":13,"pool":3,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №14","fio":"","start":"2026-07-29","end":"2026-07-30","color":"#60a5fa","ep":14,"pool":3,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №15","fio":"","start":"2026-08-03","end":"2026-08-04","color":"#60a5fa","ep":15,"pool":3,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №16","fio":"","start":"2026-08-06","end":"2026-08-07","color":"#60a5fa","ep":16,"pool":3,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №17","fio":"","start":"2026-08-11","end":"2026-08-12","color":"#60a5fa","ep":17,"pool":4,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №18","fio":"","start":"2026-08-14","end":"2026-08-17","color":"#60a5fa","ep":18,"pool":4,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №19","fio":"","start":"2026-08-19","end":"2026-08-20","color":"#60a5fa","ep":19,"pool":4,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №20","fio":"","start":"2026-08-24","end":"2026-08-25","color":"#60a5fa","ep":20,"pool":4,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №21","fio":"","start":"2026-08-27","end":"2026-08-28","color":"#60a5fa","ep":21,"pool":4,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №22","fio":"","start":"2026-09-01","end":"2026-09-02","color":"#60a5fa","ep":22,"pool":5,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №23","fio":"","start":"2026-09-04","end":"2026-09-07","color":"#60a5fa","ep":23,"pool":5,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №24","fio":"","start":"2026-09-09","end":"2026-09-10","color":"#60a5fa","ep":24,"pool":5,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №25","fio":"","start":"2026-09-14","end":"2026-09-15","color":"#60a5fa","ep":25,"pool":5,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №26","fio":"","start":"2026-09-17","end":"2026-09-18","color":"#60a5fa","ep":26,"pool":5,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №27","fio":"","start":"2026-09-22","end":"2026-09-23","color":"#60a5fa","ep":27,"pool":6,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №28","fio":"","start":"2026-09-25","end":"2026-09-28","color":"#60a5fa","ep":28,"pool":6,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №29","fio":"","start":"2026-09-30","end":"2026-10-01","color":"#60a5fa","ep":29,"pool":6,"phase":null},{"specialist":"Монтаж","group":"Постпродакшн","name":"Ролик №30","fio":"","start":"2026-10-05","end":"2026-10-06","color":"#60a5fa","ep":30,"pool":6,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-20","end":"2026-05-21","color":"#60a5fa","ep":1,"pool":null,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №2","fio":"","start":"2026-06-10","end":"2026-06-11","color":"#60a5fa","ep":2,"pool":1,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №3","fio":"","start":"2026-06-16","end":"2026-06-17","color":"#60a5fa","ep":3,"pool":1,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №4","fio":"","start":"2026-06-19","end":"2026-06-22","color":"#60a5fa","ep":4,"pool":1,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №5","fio":"","start":"2026-06-24","end":"2026-06-25","color":"#60a5fa","ep":5,"pool":1,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №6","fio":"","start":"2026-06-29","end":"2026-06-30","color":"#60a5fa","ep":6,"pool":1,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №7","fio":"","start":"2026-07-02","end":"2026-07-03","color":"#60a5fa","ep":7,"pool":2,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №8","fio":"","start":"2026-07-07","end":"2026-07-08","color":"#60a5fa","ep":8,"pool":2,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №9","fio":"","start":"2026-07-10","end":"2026-07-13","color":"#60a5fa","ep":9,"pool":2,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №10","fio":"","start":"2026-07-15","end":"2026-07-16","color":"#60a5fa","ep":10,"pool":2,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №11","fio":"","start":"2026-07-20","end":"2026-07-21","color":"#60a5fa","ep":11,"pool":2,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №12","fio":"","start":"2026-07-23","end":"2026-07-24","color":"#60a5fa","ep":12,"pool":3,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №13","fio":"","start":"2026-07-28","end":"2026-07-29","color":"#60a5fa","ep":13,"pool":3,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №14","fio":"","start":"2026-07-31","end":"2026-08-03","color":"#60a5fa","ep":14,"pool":3,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №15","fio":"","start":"2026-08-05","end":"2026-08-06","color":"#60a5fa","ep":15,"pool":3,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №16","fio":"","start":"2026-08-10","end":"2026-08-11","color":"#60a5fa","ep":16,"pool":3,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №17","fio":"","start":"2026-08-13","end":"2026-08-14","color":"#60a5fa","ep":17,"pool":4,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №18","fio":"","start":"2026-08-18","end":"2026-08-19","color":"#60a5fa","ep":18,"pool":4,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №19","fio":"","start":"2026-08-21","end":"2026-08-24","color":"#60a5fa","ep":19,"pool":4,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №20","fio":"","start":"2026-08-26","end":"2026-08-27","color":"#60a5fa","ep":20,"pool":4,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №21","fio":"","start":"2026-08-31","end":"2026-09-01","color":"#60a5fa","ep":21,"pool":4,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №22","fio":"","start":"2026-09-03","end":"2026-09-04","color":"#60a5fa","ep":22,"pool":5,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №23","fio":"","start":"2026-09-08","end":"2026-09-09","color":"#60a5fa","ep":23,"pool":5,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №24","fio":"","start":"2026-09-11","end":"2026-09-14","color":"#60a5fa","ep":24,"pool":5,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №25","fio":"","start":"2026-09-16","end":"2026-09-17","color":"#60a5fa","ep":25,"pool":5,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №26","fio":"","start":"2026-09-21","end":"2026-09-22","color":"#60a5fa","ep":26,"pool":5,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №27","fio":"","start":"2026-09-24","end":"2026-09-25","color":"#60a5fa","ep":27,"pool":6,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №28","fio":"","start":"2026-09-29","end":"2026-09-30","color":"#60a5fa","ep":28,"pool":6,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №29","fio":"","start":"2026-10-02","end":"2026-10-05","color":"#60a5fa","ep":29,"pool":6,"phase":null},{"specialist":"Клин-ап / Цветокоррекция","group":"Постпродакшн","name":"Ролик №30","fio":"","start":"2026-10-07","end":"2026-10-08","color":"#60a5fa","ep":30,"pool":6,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-20","end":"2026-05-21","color":"#60a5fa","ep":1,"pool":null,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №2","fio":"","start":"2026-06-15","end":"2026-06-15","color":"#60a5fa","ep":2,"pool":1,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №3","fio":"","start":"2026-06-18","end":"2026-06-18","color":"#60a5fa","ep":3,"pool":1,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №4","fio":"","start":"2026-06-23","end":"2026-06-23","color":"#60a5fa","ep":4,"pool":1,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №5","fio":"","start":"2026-06-26","end":"2026-06-26","color":"#60a5fa","ep":5,"pool":1,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №6","fio":"","start":"2026-07-01","end":"2026-07-01","color":"#60a5fa","ep":6,"pool":1,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №7","fio":"","start":"2026-07-06","end":"2026-07-06","color":"#60a5fa","ep":7,"pool":2,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №8","fio":"","start":"2026-07-09","end":"2026-07-09","color":"#60a5fa","ep":8,"pool":2,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №9","fio":"","start":"2026-07-14","end":"2026-07-14","color":"#60a5fa","ep":9,"pool":2,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №10","fio":"","start":"2026-07-17","end":"2026-07-17","color":"#60a5fa","ep":10,"pool":2,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №11","fio":"","start":"2026-07-22","end":"2026-07-22","color":"#60a5fa","ep":11,"pool":2,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №12","fio":"","start":"2026-07-27","end":"2026-07-27","color":"#60a5fa","ep":12,"pool":3,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №13","fio":"","start":"2026-07-30","end":"2026-07-30","color":"#60a5fa","ep":13,"pool":3,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №14","fio":"","start":"2026-08-04","end":"2026-08-04","color":"#60a5fa","ep":14,"pool":3,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №15","fio":"","start":"2026-08-07","end":"2026-08-07","color":"#60a5fa","ep":15,"pool":3,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №16","fio":"","start":"2026-08-12","end":"2026-08-12","color":"#60a5fa","ep":16,"pool":3,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №17","fio":"","start":"2026-08-17","end":"2026-08-17","color":"#60a5fa","ep":17,"pool":4,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №18","fio":"","start":"2026-08-20","end":"2026-08-20","color":"#60a5fa","ep":18,"pool":4,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №19","fio":"","start":"2026-08-25","end":"2026-08-25","color":"#60a5fa","ep":19,"pool":4,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №20","fio":"","start":"2026-08-28","end":"2026-08-28","color":"#60a5fa","ep":20,"pool":4,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №21","fio":"","start":"2026-09-02","end":"2026-09-02","color":"#60a5fa","ep":21,"pool":4,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №22","fio":"","start":"2026-09-07","end":"2026-09-07","color":"#60a5fa","ep":22,"pool":5,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №23","fio":"","start":"2026-09-10","end":"2026-09-10","color":"#60a5fa","ep":23,"pool":5,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №24","fio":"","start":"2026-09-15","end":"2026-09-15","color":"#60a5fa","ep":24,"pool":5,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №25","fio":"","start":"2026-09-18","end":"2026-09-18","color":"#60a5fa","ep":25,"pool":5,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №26","fio":"","start":"2026-09-23","end":"2026-09-23","color":"#60a5fa","ep":26,"pool":5,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №27","fio":"","start":"2026-09-28","end":"2026-09-28","color":"#60a5fa","ep":27,"pool":6,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №28","fio":"","start":"2026-10-01","end":"2026-10-01","color":"#60a5fa","ep":28,"pool":6,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №29","fio":"","start":"2026-10-06","end":"2026-10-06","color":"#60a5fa","ep":29,"pool":6,"phase":null},{"specialist":"Саунд-дизайн","group":"Постпродакшн","name":"Ролик №30","fio":"","start":"2026-10-09","end":"2026-10-09","color":"#60a5fa","ep":30,"pool":6,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Ролик №1 (пилот)","fio":"","start":"2026-05-21","end":"2026-05-25","color":"#e11d48","ep":1,"pool":null,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Пул №1 (ролики 2–6)","fio":"","start":"2026-07-02","end":"2026-07-09","color":"#e11d48","ep":null,"pool":1,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Пул №2 (ролики 7–11)","fio":"","start":"2026-07-23","end":"2026-07-30","color":"#e11d48","ep":null,"pool":2,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Пул №3 (ролики 12–16)","fio":"","start":"2026-08-13","end":"2026-08-20","color":"#e11d48","ep":null,"pool":3,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Пул №4 (ролики 17–21)","fio":"","start":"2026-09-03","end":"2026-09-10","color":"#e11d48","ep":null,"pool":4,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Пул №5 (ролики 22–26)","fio":"","start":"2026-09-24","end":"2026-10-01","color":"#e11d48","ep":null,"pool":5,"phase":null},{"specialist":"Согласование с клиентом","group":"Согласование","name":"Пул №6 (ролики 27–30)","fio":"","start":"2026-10-12","end":"2026-10-19","color":"#e11d48","ep":null,"pool":6,"phase":null}],"specialists":["Генеральный директор","Руководитель проекта","Генеральный продюсер","Исполнительный продюсер","HR / Поиск команды","Креативный продюсер","Арт-директор","Гл. редактор / AI редактор","Автор сценария","AI-супервайзер","Промпт-инженер / AI художник","Композитор","Диктор","Монтаж","Клин-ап / Цветокоррекция","Саунд-дизайн","Согласование с клиентом"],"groups":["Управление","Концепция","ИИ-производство","Постпродакшн","Согласование"],"projectStart":"2026-05-04","projectEnd":"2026-10-19","epSummary":[{"ep":1,"scriptStart":"2026-05-08","masterDate":"2026-05-25","pool":null},{"ep":2,"scriptStart":"2026-06-01","masterDate":"2026-07-09","pool":1},{"ep":3,"scriptStart":"2026-06-03","masterDate":"2026-07-09","pool":1},{"ep":4,"scriptStart":"2026-06-05","masterDate":"2026-07-09","pool":1},{"ep":5,"scriptStart":"2026-06-09","masterDate":"2026-07-09","pool":1},{"ep":6,"scriptStart":"2026-06-11","masterDate":"2026-07-09","pool":1},{"ep":7,"scriptStart":"2026-06-16","masterDate":"2026-07-30","pool":2},{"ep":8,"scriptStart":"2026-06-18","masterDate":"2026-07-30","pool":2},{"ep":9,"scriptStart":"2026-06-22","masterDate":"2026-07-30","pool":2},{"ep":10,"scriptStart":"2026-06-24","masterDate":"2026-07-30","pool":2},{"ep":11,"scriptStart":"2026-06-26","masterDate":"2026-07-30","pool":2},{"ep":12,"scriptStart":"2026-06-30","masterDate":"2026-08-20","pool":3},{"ep":13,"scriptStart":"2026-07-02","masterDate":"2026-08-20","pool":3},{"ep":14,"scriptStart":"2026-07-06","masterDate":"2026-08-20","pool":3},{"ep":15,"scriptStart":"2026-07-08","masterDate":"2026-08-20","pool":3},{"ep":16,"scriptStart":"2026-07-10","masterDate":"2026-08-20","pool":3},{"ep":17,"scriptStart":"2026-07-14","masterDate":"2026-09-10","pool":4},{"ep":18,"scriptStart":"2026-07-16","masterDate":"2026-09-10","pool":4},{"ep":19,"scriptStart":"2026-07-20","masterDate":"2026-09-10","pool":4},{"ep":20,"scriptStart":"2026-07-22","masterDate":"2026-09-10","pool":4},{"ep":21,"scriptStart":"2026-07-24","masterDate":"2026-09-10","pool":4},{"ep":22,"scriptStart":"2026-07-28","masterDate":"2026-10-01","pool":5},{"ep":23,"scriptStart":"2026-07-30","masterDate":"2026-10-01","pool":5},{"ep":24,"scriptStart":"2026-08-03","masterDate":"2026-10-01","pool":5},{"ep":25,"scriptStart":"2026-08-05","masterDate":"2026-10-01","pool":5},{"ep":26,"scriptStart":"2026-08-07","masterDate":"2026-10-01","pool":5},{"ep":27,"scriptStart":"2026-08-11","masterDate":"2026-10-19","pool":6},{"ep":28,"scriptStart":"2026-08-13","masterDate":"2026-10-19","pool":6},{"ep":29,"scriptStart":"2026-08-17","masterDate":"2026-10-19","pool":6},{"ep":30,"scriptStart":"2026-08-19","masterDate":"2026-10-19","pool":6}],"phaseColors":{"script":"#a78bfa","gen":"#fb923c","voice":"#f59e0b","edit":"#60a5fa","clean":"#34d399","sound":"#f472b6","approval":"#e11d48","mgmt":"#94a3b8","concept":"#34d399","ai":"#fb923c","post":"#60a5fa"}};
+const MRU=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+const GROUPS=['Управление','Концепция','ИИ-производство','Постпродакшн','Согласование'];
+const GC={'Управление':'#94a3b8','Концепция':'#34d399','ИИ-производство':'#fb923c','Постпродакшн':'#60a5fa','Согласование':'#f472b6'};
+const PHL={script:'Сценарий',gen:'Генерация',voice:'Диктор',edit:'Монтаж',clean:'Клин-ап/Цвет',sound:'Саунд',approval:'Согласование'};
+const LW=220;
+const PS=new Date('2026-05-04'),PE=new Date(DATA.projectEnd),TOT=PE-PS;
+function pd(ds){return Math.max(0,Math.min(100,(new Date(ds)-PS)/TOT*100));}
+function pdD(d){return Math.max(0,Math.min(100,(d-PS)/TOT*100));}
+function fmtD(ds){const d=new Date(ds);return d.getDate()+' '+MRU[d.getMonth()];}
+function mkM(){const a=[];let d=new Date('2026-05-01');while(d<=PE){a.push(new Date(d));d=new Date(d);d.setMonth(d.getMonth()+1);}return a;}
+function mkW(){const a=[];let d=new Date('2026-05-04');while(d<=PE){a.push(new Date(d));d=new Date(d);d.setDate(d.getDate()+7);}return a;}
+function mkD(){const a=[];let d=new Date(PS);while(d<=PE){if(d.getDay()&&d.getDay()<6)a.push(new Date(d));d=new Date(d);d.setDate(d.getDate()+1);}return a;}
+const MM=mkM(),MW=mkW(),MD=mkD();
+let ag='all',as_=null,zm='month';
+const BG={};GROUPS.forEach(g=>{BG[g]=[...new Set(DATA.tasks.filter(t=>t.group===g&&t.specialist!=='__ep__').map(t=>t.specialist))];});
+function getTW(){return zm==='month'?MM.length*130:zm==='week'?MW.length*65:MD.length*32;}
+function vl(p,x){const v=document.createElement('div');v.className='vl';v.style.left=x+'px';p.appendChild(v);}
+function tln(p,tw){const tp=pdD(new Date())/100*tw;if(tp>0&&tp<tw){const t=document.createElement('div');t.className='tln';t.style.left=tp+'px';p.appendChild(t);}}
+function grid(p,tw){
+  if(zm==='month')MM.forEach(m=>vl(p,pdD(m)/100*tw));
+  else if(zm==='week')MW.forEach(w=>vl(p,pdD(w)/100*tw));
+  else MD.filter((_,i)=>i%5===0).forEach(d=>vl(p,pdD(d)/100*tw));
 }
+function mkBar(task,tw){
+  const bl=pd(task.start)/100*tw,bw=Math.max((pd(task.end)-pd(task.start))/100*tw,3);
+  const b=document.createElement('div');b.className='bar';
+  b.style.cssText='left:'+bl+'px;width:'+bw+'px;background:'+task.color;
+  b.addEventListener('mouseenter',e=>showT(e,task));
+  b.addEventListener('mousemove',mvT);b.addEventListener('mouseleave',hdT);
+  return b;
+}
+function buildSpp(){
+  const c=document.getElementById('spp');c.querySelectorAll('[data-s]').forEach(e=>e.remove());
+  const sp=ag==='all'?DATA.specialists:(BG[ag]||[]);
+  sp.forEach(s=>{const b=document.createElement('button');b.className='pl ps'+(as_===s?' on':'');
+    b.dataset.s=s;b.textContent=s;b.onclick=()=>{as_=as_===s?null:s;render();};c.appendChild(b);});
+}
+function buildHead(tw){
+  const h=document.createElement('div');h.className='gh';
+  const lc=document.createElement('div');lc.className='hlc';lc.style.width=LW+'px';lc.style.minWidth=LW+'px';lc.textContent='Ролик / Специалист';h.appendChild(lc);
+  const ht=document.createElement('div');ht.className='ht';ht.style.width=tw+'px';
+  const mr=document.createElement('div');mr.className='mr';
+  if(zm==='month'){MM.forEach(m=>{const c=document.createElement('div');c.className='mc';c.style.width='130px';c.textContent=m.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'}).replace('.',"'");mr.appendChild(c);});}
+  else{MM.forEach(m=>{const nm=new Date(m);nm.setMonth(nm.getMonth()+1);const w=Math.max((pdD(nm)-pdD(m))/100*tw,1);const c=document.createElement('div');c.className='mc';c.style.width=w+'px';c.textContent=m.toLocaleDateString('ru-RU',{month:'long'});mr.appendChild(c);});}
+  ht.appendChild(mr);
+  const wr=document.createElement('div');wr.className='wr';
+  if(zm==='month'){MW.forEach(w=>{const nw=new Date(w);nw.setDate(nw.getDate()+7);const ww=Math.max((pdD(nw)-pdD(w))/100*tw,1);const c=document.createElement('div');c.className='wc';c.style.width=ww+'px';c.textContent=w.getDate();wr.appendChild(c);});}
+  else if(zm==='week'){MW.forEach(w=>{const c=document.createElement('div');c.className='wc';c.style.width='65px';c.textContent=w.toLocaleDateString('ru-RU',{day:'numeric',month:'numeric'});wr.appendChild(c);});}
+  else{MD.forEach(d=>{const c=document.createElement('div');c.className='wc';c.style.width='32px';c.style.fontSize='8px';c.textContent=d.getDate();wr.appendChild(c);});}
+  ht.appendChild(wr);h.appendChild(ht);return h;
+}
+function secDiv(title,tw){
+  const s=document.createElement('div');s.className='sh';s.style.marginTop='2px';
+  const t=document.createElement('div');t.className='st2';t.style.width=LW+'px';t.style.minWidth=LW+'px';t.textContent=title;s.appendChild(t);
+  const tl=document.createElement('div');tl.className='stl';tl.style.width=tw+'px';grid(tl,tw);tln(tl,tw);s.appendChild(tl);return s;
+}
+function render(){
+  buildSpp();
+  document.querySelectorAll('[data-g]').forEach(b=>b.classList.toggle('on',b.dataset.g===ag));
+  document.querySelectorAll('[data-z]').forEach(b=>b.classList.toggle('on',b.dataset.z===zm));
+  const tw=getTW();const gi=document.getElementById('gi');gi.innerHTML='';
+  gi.appendChild(buildHead(tw));
 
-function render(filter) {
-  const gantt = document.getElementById('gantt');
-  gantt.innerHTML = '';
+  // ── РОЛИКИ ──
+  gi.appendChild(secDiv('РОЛИКИ',tw));
+  const epT={};DATA.tasks.filter(t=>t.specialist==='__ep__').forEach(t=>{if(!epT[t.ep])epT[t.ep]=[];epT[t.ep].push(t);});
+  for(let ep=1;ep<=30;ep++){
+    const tasks=epT[ep];if(!tasks)continue;
+    const sum=DATA.epSummary.find(e=>e.ep===ep);
+    const row=document.createElement('div');row.className='er';
+    const lbl=document.createElement('div');lbl.className='el';lbl.style.width=LW+'px';lbl.style.minWidth=LW+'px';
+    const ns=document.createElement('span');ns.textContent='Ролик №'+ep+(ep===1?' (пилот)':'');lbl.appendChild(ns);
+    if(sum){const ms=document.createElement('span');ms.className='em';ms.textContent=fmtD(sum.masterDate);lbl.appendChild(ms);}
+    row.appendChild(lbl);
+    const etl=document.createElement('div');etl.className='etl';etl.style.width=tw+'px';etl.style.position='relative';etl.style.height='100%';
+    grid(etl,tw);tln(etl,tw);
+    tasks.forEach(t=>etl.appendChild(mkBar(t,tw)));
+    if(sum){const mx=pd(sum.masterDate)/100*tw;const mm=document.createElement('div');mm.className='mm';mm.style.left=(mx-4)+'px';
+      mm.addEventListener('mouseenter',e=>{tip.innerHTML='<div class="tt">Мастер — Ролик №'+ep+'</div><div class="tm">'+fmtD(sum.masterDate)+'</div>';tip.style.display='block';mvT(e);});
+      mm.addEventListener('mousemove',mvT);mm.addEventListener('mouseleave',hdT);etl.appendChild(mm);}
+    row.appendChild(etl);gi.appendChild(row);
+  }
 
-  // Month headers
-  const mh = document.createElement('div');
-  mh.className = 'month-header';
-  months.forEach(m => {
-    const c = document.createElement('div');
-    c.className = 'month-cell';
-    c.textContent = m.toLocaleDateString('ru-RU', { month: 'short' }).replace('.','');
-    mh.appendChild(c);
-  });
-  gantt.appendChild(mh);
-
-  // Today line placeholder (added inside rows)
-  const todayPct = pct(new Date().toISOString().slice(0,10));
-
-  GROUP_ORDER.forEach(grp => {
-    const tasks = TASKS.filter(t => t.g === grp && (filter === 'all' || filter === grp));
-    if (!tasks.length) return;
-
-    const gl = document.createElement('div');
-    gl.className = 'group-label';
-    gl.style.color = COLORS[grp].active;
-    gl.innerHTML = `<div class="group-dot" style="background:${COLORS[grp].active}"></div>${grp.toUpperCase()}`;
-    gantt.appendChild(gl);
-
-    tasks.forEach((task, i) => {
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.style.animationDelay = (i * 0.02) + 's';
-
-      // Label
-      const rl = document.createElement('div');
-      rl.className = 'row-label';
-      rl.innerHTML = `<div class="row-task" title="${task.t}">${task.t}</div><div class="row-sub">${task.e} · ${task.b}</div>`;
-      row.appendChild(rl);
-
-      // Timeline
-      const tl = document.createElement('div');
-      tl.className = 'timeline-bg';
-
-      // Month stripes
-      months.forEach((m, idx) => {
-        const s = document.createElement('div');
-        s.className = 'month-stripe';
-        s.style.left = (idx / months.length * 100) + '%';
-        tl.appendChild(s);
+  // ── СПЕЦИАЛИСТЫ ──
+  gi.appendChild(secDiv('СПЕЦИАЛИСТЫ',tw));
+  const vg=ag==='all'?GROUPS:[ag];
+  vg.forEach(grp=>{
+    const gt=DATA.tasks.filter(t=>t.group===grp&&t.specialist!=='__ep__'&&(!as_||t.specialist===as_));
+    if(!gt.length)return;
+    const gd=document.createElement('div');gd.className='gd';
+    const gdl=document.createElement('div');gdl.className='gdl';gdl.style.width=LW+'px';gdl.style.minWidth=LW+'px';
+    const dot=document.createElement('div');dot.className='gdo';dot.style.background=GC[grp];
+    const gn=document.createElement('div');gn.className='gdn';gn.style.color=GC[grp];gn.textContent=grp;
+    gdl.appendChild(dot);gdl.appendChild(gn);gd.appendChild(gdl);
+    const gtl=document.createElement('div');gtl.style.cssText='flex:1;position:relative;height:100%;width:'+tw+'px';grid(gtl,tw);tln(gtl,tw);gd.appendChild(gtl);gi.appendChild(gd);
+    const specs=[...new Set(gt.map(t=>t.specialist))];
+    specs.forEach(spec=>{
+      const st=gt.filter(t=>t.specialist===spec);
+      const sh=document.createElement('div');sh.className='sph';
+      const shl=document.createElement('div');shl.className='sphl';shl.style.width=LW+'px';shl.style.minWidth=LW+'px';
+      const sn=document.createElement('div');sn.className='spn';sn.textContent=spec;
+      const sf=document.createElement('div');sf.className='spf';sf.textContent=st[0]?.fio||'— ФИО';
+      const tog=document.createElement('div');tog.className='spt';tog.textContent='▾';
+      shl.appendChild(sn);shl.appendChild(sf);shl.appendChild(tog);sh.appendChild(shl);
+      const shtl=document.createElement('div');shtl.className='sphtl';shtl.style.width=tw+'px';
+      grid(shtl,tw);tln(shtl,tw);
+      const ss=Math.min(...st.map(t=>new Date(t.start))),se=Math.max(...st.map(t=>new Date(t.end)));
+      const sb=document.createElement('div');sb.className='sbar';
+      sb.style.cssText='left:'+(pdD(new Date(ss))/100*tw)+'px;width:'+Math.max((pdD(new Date(se))-pdD(new Date(ss)))/100*tw,2)+'px;background:'+GC[grp];
+      shtl.appendChild(sb);sh.appendChild(shtl);gi.appendChild(sh);
+      const sec=document.createElement('div');
+      st.forEach(task=>{
+        const row=document.createElement('div');row.className='tr2';
+        const tl=document.createElement('div');tl.className='tlb';tl.style.width=LW+'px';tl.style.minWidth=LW+'px';tl.textContent=task.name;tl.title=task.name;row.appendChild(tl);
+        const ttl=document.createElement('div');ttl.className='ttl';ttl.style.width=tw+'px';ttl.style.position='relative';ttl.style.height='100%';
+        grid(ttl,tw);tln(ttl,tw);ttl.appendChild(mkBar(task,tw));row.appendChild(ttl);sec.appendChild(row);
       });
-
-      // Today line
-      if (todayPct > 0 && todayPct < 100) {
-        const tl2 = document.createElement('div');
-        tl2.className = 'today-line';
-        tl2.style.left = todayPct + '%';
-        tl.appendChild(tl2);
-      }
-
-      // Bar
-      const left = pct(task.s);
-      const right = pct(task.end);
-      const width = Math.max(right - left, 0.4);
-      if (width > 0) {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        const col = COLORS[task.g];
-        const isActive = task.st === 'В работе';
-        bar.style.cssText = `left:${left}%;width:${width}%;background:${isActive ? col.active : col.dim};opacity:${isActive ? 1 : 0.8};`;
-        if (!isActive) bar.style.border = `1px solid ${col.active}33`;
-
-        // Tooltip
-        bar.addEventListener('mouseenter', e => showTooltip(e, task));
-        bar.addEventListener('mousemove', e => moveTooltip(e));
-        bar.addEventListener('mouseleave', hideTooltip);
-        tl.appendChild(bar);
-      }
-
-      row.appendChild(tl);
-      gantt.appendChild(row);
+      gi.appendChild(sec);
+      let col=false;sh.addEventListener('click',()=>{col=!col;sec.style.display=col?'none':'';tog.textContent=col?'▸':'▾';});
     });
   });
 }
-
-const tooltip = document.getElementById('tooltip');
-function showTooltip(e, task) {
-  const col = COLORS[task.g].active;
-  tooltip.innerHTML = `
-    <div class="tooltip-title">${task.t}</div>
-    <div class="tooltip-meta">
-      <span style="color:${col}">${task.g}</span><br>
-      ${task.e}<br>
-      ${task.b}<br>
-      ${task.s} → ${task.end}<br>
-      <span style="color:${task.st==='В работе'?'#34d399':'#666'}">${task.st}</span>
-    </div>`;
-  tooltip.style.display = 'block';
-  moveTooltip(e);
+const tip=document.getElementById('tip');
+function showT(e,task){
+  const ph=task.phase?PHL[task.phase]:'';const col=task.color;
+  tip.innerHTML=(ph?'<span class="tph" style="background:'+col+'22;color:'+col+'">'+ph+'</span><br>':'')+
+    '<div class="tt">'+(task.specialist==='__ep__'?'Ролик №'+task.ep:task.specialist)+'</div>'+
+    '<div>'+task.name.replace(/ /g,' ').replace(/ — .+/,'')+'</div>'+
+    '<div class="tm">'+(task.specialist!=='__ep__'?task.group+'<br>':'')+fmtD(task.start)+' → '+fmtD(task.end)+'</div>';
+  tip.style.display='block';mvT(e);
 }
-function moveTooltip(e) {
-  tooltip.style.left = (e.clientX + 14) + 'px';
-  tooltip.style.top  = (e.clientY - 10) + 'px';
-}
-function hideTooltip() { tooltip.style.display = 'none'; }
-
-render('all');
-
-document.getElementById('filters').addEventListener('click', e => {
-  if (!e.target.dataset.group) return;
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-  e.target.classList.add('active');
-  render(e.target.dataset.group);
-});
+function mvT(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-8)+'px';}
+function hdT(){tip.style.display='none';}
+document.querySelectorAll('[data-g]').forEach(b=>b.addEventListener('click',()=>{ag=b.dataset.g;as_=null;render();}));
+document.querySelectorAll('[data-z]').forEach(b=>b.addEventListener('click',()=>{zm=b.dataset.z;render();}));
+render();
 </script>
 </body>
 </html>
