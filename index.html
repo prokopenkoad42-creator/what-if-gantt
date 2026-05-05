@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Что если.. — Production Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --surface: #141414;
+  --surface2: #1a1a1a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0ee;
+  --muted: #666;
+  --muted2: #444;
+  --управление: #a78bfa;
+  --концепция: #34d399;
+  --ии: #fb923c;
+  --пост: #60a5fa;
+  --active: rgba(255,255,255,0.9);
+  --row-h: 36px;
+  --label-w: 260px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+.header {
+  padding: 48px 48px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.header-left h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(22px, 4vw, 36px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text);
+}
+.header-left h1 span { color: var(--мuted); opacity: 0.4; }
+.header-meta {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+}
+.meta-item { font-size: 12px; color: var(--muted); }
+.meta-item strong { display: block; font-size: 20px; font-weight: 400; color: var(--text); font-family: 'Unbounded', sans-serif; }
+
+/* FILTERS */
+.filters {
+  padding: 20px 48px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.filter-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
+.pill {
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.pill:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+.pill.active { color: #0d0d0d; border-color: transparent; }
+.pill[data-group="all"].active { background: var(--text); }
+.pill[data-group="Управление"].active { background: var(--управление); }
+.pill[data-group="Концепция"].active { background: var(--концепция); }
+.pill[data-group="ИИ-производство"].active { background: var(--ии); }
+.pill[data-group="Постпродакшн"].active { background: var(--пост); }
+
+/* GANTT */
+.gantt-wrap {
+  padding: 0 48px 48px;
+  overflow-x: auto;
+}
+.gantt { min-width: 900px; }
+
+.month-header {
+  display: flex;
+  margin-left: var(--label-w);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.month-cell {
+  flex: 1;
+  font-size: 11px;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 16px 0 12px;
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+.month-cell:first-child { border-left: none; }
+
+.group-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 20px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.group-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.row {
+  display: flex;
+  align-items: center;
+  height: var(--row-h);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.row:hover { background: rgba(255,255,255,0.02); }
+
+.row-label {
+  min-width: var(--label-w);
+  width: var(--label-w);
+  flex-shrink: 0;
+  padding-right: 20px;
+}
+.row-task {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.row-sub {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-bg {
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+.month-stripe {
+  position: absolute;
+  top: 0; bottom: 0;
+  border-left: 1px solid var(--border);
+}
+.bar {
+  position: absolute;
+  height: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 3px;
+  cursor: default;
+  transition: opacity 0.2s, filter 0.2s;
+}
+.bar:hover { opacity: 1 !important; filter: brightness(1.2); }
+
+/* TODAY LINE */
+.today-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(255,255,255,0.3);
+  z-index: 10;
+}
+.today-line::before {
+  content: 'сегодня';
+  position: absolute;
+  top: -20px;
+  left: 4px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+
+/* LEGEND */
+.legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 0 48px 24px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.legend-bar {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* STATUS DOTS */
+.status-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* TOOLTIP */
+.tooltip {
+  position: fixed;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 260px;
+  display: none;
+  line-height: 1.6;
+}
+.tooltip-title { font-weight: 500; margin-bottom: 4px; }
+.tooltip-meta { color: var(--muted); font-size: 11px; }
+
+/* FADE IN */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.row { animation: fadeUp 0.3s ease both; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Что если<span>..</span></h1>
+    <div class="header-meta">
+      <div class="meta-item"><strong>30</strong>роликов</div>
+      <div class="meta-item"><strong>5</strong>батчей</div>
+      <div class="meta-item"><strong>48</strong>задач</div>
+      <div class="meta-item"><strong>май — окт</strong>2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="filters" id="filters">
+  <span class="filter-label">Группа</span>
+  <button class="pill active" data-group="all">Все</button>
+  <button class="pill" data-group="Управление">Управление</button>
+  <button class="pill" data-group="Концепция">Концепция</button>
+  <button class="pill" data-group="ИИ-производство">ИИ-производство</button>
+  <button class="pill" data-group="Постпродакшн">Постпродакшн</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-bar" style="background:var(--управление)"></div>Управление</div>
+  <div class="legend-item"><div class="legend-bar" style="background:var(--концепция)"></div>Концепция</div>
+  <div class="legend-item"><div class="legend-bar" style="background:var(--ии)"></div>ИИ-производство</div>
+  <div class="legend-item"><div class="legend-bar" style="background:var(--пост)"></div>Постпродакшн</div>
+  <div class="legend-item"><div class="legend-bar" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.15)"></div>Не начато</div>
+  <div class="legend-item"><div class="legend-bar" style="background:rgba(255,255,255,0.6)"></div>В работе</div>
+</div>
+
+<div class="gantt-wrap">
+  <div class="gantt" id="gantt"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const TASKS = [
+  {e:"Исполнительный продюсер",g:"Управление",t:"Ведение производства проекта",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
+  {e:"Креативный продюсер",g:"Концепция",t:"Концепция и тональность серии",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
+  {e:"Арт-директор",g:"Концепция",t:"Визуальный стиль пилота",b:"Пилот №1",s:"2026-05-08",end:"2026-05-18",st:"Не начато"},
+  {e:"Арт-директор",g:"Концепция",t:"Визуальный стиль батч 1–2",b:"Батч 1–2",s:"2026-05-18",end:"2026-07-13",st:"Не начато"},
+  {e:"Арт-директор",g:"Концепция",t:"Контроль стиля батч 3–4",b:"Батч 3–4",s:"2026-07-14",end:"2026-10-31",st:"Не начато"},
+  {e:"Главный редактор / AI редактор",g:"Концепция",t:"Редактура сценариев и фактчек",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
+  {e:"Автор сценария",g:"Концепция",t:"Сценарий пилота",b:"Пилот №1",s:"2026-05-08",end:"2026-05-12",st:"Не начато"},
+  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 1",b:"Батч 1 №2–6",s:"2026-05-18",end:"2026-06-14",st:"Не начато"},
+  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 2",b:"Батч 2 №7–12",s:"2026-06-08",end:"2026-07-13",st:"Не начато"},
+  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 3",b:"Батч 3 №13–20",s:"2026-07-07",end:"2026-08-17",st:"Не начато"},
+  {e:"Автор сценария",g:"Концепция",t:"Сценарии батч 4",b:"Батч 4 №21–30",s:"2026-08-11",end:"2026-09-14",st:"Не начато"},
+  {e:"AI-супервайзер",g:"ИИ-производство",t:"Контроль ИИ-пайплайна и качества",b:"Весь проект",s:"2026-05-08",end:"2026-10-31",st:"В работе"},
+  {e:"AI-супервайзер",g:"ИИ-производство",t:"Генерация пилота",b:"Пилот №1",s:"2026-05-13",end:"2026-05-19",st:"Не начато"},
+  {e:"HR / Поиск команды",g:"ИИ-производство",t:"Поиск промптеров",b:"—",s:"2026-05-11",end:"2026-05-31",st:"Не начато"},
+  {e:"HR / Поиск команды",g:"ИИ-производство",t:"Онбординг юнитов A+B",b:"—",s:"2026-06-01",end:"2026-06-07",st:"Не начато"},
+  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Онбординг",b:"—",s:"2026-06-01",end:"2026-06-07",st:"Не начато"},
+  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Генерация батч 1",b:"Батч 1",s:"2026-06-08",end:"2026-07-06",st:"Не начато"},
+  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Генерация батч 2",b:"Батч 2",s:"2026-07-07",end:"2026-08-03",st:"Не начато"},
+  {e:"Промпт-юнит A",g:"ИИ-производство",t:"Генерация батч 4",b:"Батч 4",s:"2026-09-07",end:"2026-10-05",st:"Не начато"},
+  {e:"Промпт-юнит B",g:"ИИ-производство",t:"Онбординг",b:"—",s:"2026-06-01",end:"2026-06-07",st:"Не начато"},
+  {e:"Промпт-юнит B",g:"ИИ-производство",t:"Генерация батч 3",b:"Батч 3",s:"2026-08-03",end:"2026-09-07",st:"Не начато"},
+  {e:"Промпт-юнит B",г:"ИИ-производство",g:"ИИ-производство",t:"Генерация батч 4 (пар.)",b:"Батч 4",s:"2026-09-07",end:"2026-10-05",st:"Не начато"},
+  {e:"Диктор",g:"Постпродакшн",t:"Озвучка пилота",b:"Пилот №1",s:"2026-05-17",end:"2026-05-19",st:"Не начато"},
+  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 1",b:"Батч 1",s:"2026-06-15",end:"2026-06-28",st:"Не начато"},
+  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 2",b:"Батч 2",s:"2026-07-13",end:"2026-07-26",st:"Не начато"},
+  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 3",b:"Батч 3",s:"2026-08-17",end:"2026-09-07",st:"Не начато"},
+  {e:"Диктор",g:"Постпродакшн",t:"Озвучка батч 4",b:"Батч 4",s:"2026-09-14",end:"2026-10-05",st:"Не начато"},
+  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
+  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 1",b:"Батч 1",s:"2026-06-29",end:"2026-07-19",st:"Не начато"},
+  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 2",b:"Батч 2",s:"2026-07-27",end:"2026-08-17",st:"Не начато"},
+  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 3",b:"Батч 3",s:"2026-09-08",end:"2026-09-28",st:"Не начато"},
+  {e:"Монтаж",g:"Постпродакшн",t:"Монтаж батч 4",b:"Батч 4",s:"2026-10-06",end:"2026-10-26",st:"Не начато"},
+  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
+  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 1",b:"Батч 1",s:"2026-07-06",end:"2026-07-19",st:"Не начато"},
+  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 2",b:"Батч 2",s:"2026-08-03",end:"2026-08-17",st:"Не начато"},
+  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 3",b:"Батч 3",s:"2026-09-15",end:"2026-09-28",st:"Не начато"},
+  {e:"Цветокоррекция",g:"Постпродакшн",t:"Цвет батч 4",b:"Батч 4",s:"2026-10-13",end:"2026-10-26",st:"Не начато"},
+  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
+  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 1",b:"Батч 1",s:"2026-07-06",end:"2026-07-19",st:"Не начато"},
+  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 2",b:"Батч 2",s:"2026-08-03",end:"2026-08-17",st:"Не начато"},
+  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 3",b:"Батч 3",s:"2026-09-15",end:"2026-09-28",st:"Не начато"},
+  {e:"Саунд-дизайн",g:"Постпродакшн",t:"Саунд батч 4",b:"Батч 4",s:"2026-10-13",end:"2026-10-26",st:"Не начато"},
+  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап пилота",b:"Пилот №1",s:"2026-05-20",end:"2026-05-24",st:"Не начато"},
+  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 1",b:"Батч 1",s:"2026-06-29",end:"2026-07-19",st:"Не начато"},
+  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 2",b:"Батч 2",s:"2026-07-27",end:"2026-08-24",st:"Не начато"},
+  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 3",b:"Батч 3",s:"2026-09-08",end:"2026-10-05",st:"Не начато"},
+  {e:"Клин-ап",g:"Постпродакшн",t:"Клин-ап батч 4",b:"Батч 4",s:"2026-10-06",end:"2026-10-26",st:"Не начато"},
+  {e:"Композитор",g:"Постпродакшн",t:"Саундтрек серии (30 треков)",b:"Весь проект",s:"2026-05-18",end:"2026-07-06",st:"Не начато"},
+];
+
+const COLORS = {
+  "Управление":     { active: "#a78bfa", dim: "rgba(167,139,250,0.25)" },
+  "Концепция":      { active: "#34d399", dim: "rgba(52,211,153,0.25)" },
+  "ИИ-производство":{ active: "#fb923c", dim: "rgba(251,146,60,0.25)" },
+  "Постпродакшн":   { active: "#60a5fa", dim: "rgba(96,165,250,0.25)" },
+};
+const GROUP_ORDER = ["Управление","Концепция","ИИ-производство","Постпродакшн"];
+
+const START = new Date("2026-05-01");
+const END   = new Date("2026-11-01");
+const TOTAL = END - START;
+
+const months = [];
+let d = new Date(START);
+while (d < END) { months.push(new Date(d)); d.setMonth(d.getMonth()+1); }
+
+function pct(dateStr) {
+  const t = new Date(dateStr) - START;
+  return Math.max(0, Math.min(100, t / TOTAL * 100));
+}
+
+function render(filter) {
+  const gantt = document.getElementById('gantt');
+  gantt.innerHTML = '';
+
+  // Month headers
+  const mh = document.createElement('div');
+  mh.className = 'month-header';
+  months.forEach(m => {
+    const c = document.createElement('div');
+    c.className = 'month-cell';
+    c.textContent = m.toLocaleDateString('ru-RU', { month: 'short' }).replace('.','');
+    mh.appendChild(c);
+  });
+  gantt.appendChild(mh);
+
+  // Today line placeholder (added inside rows)
+  const todayPct = pct(new Date().toISOString().slice(0,10));
+
+  GROUP_ORDER.forEach(grp => {
+    const tasks = TASKS.filter(t => t.g === grp && (filter === 'all' || filter === grp));
+    if (!tasks.length) return;
+
+    const gl = document.createElement('div');
+    gl.className = 'group-label';
+    gl.style.color = COLORS[grp].active;
+    gl.innerHTML = `<div class="group-dot" style="background:${COLORS[grp].active}"></div>${grp.toUpperCase()}`;
+    gantt.appendChild(gl);
+
+    tasks.forEach((task, i) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.animationDelay = (i * 0.02) + 's';
+
+      // Label
+      const rl = document.createElement('div');
+      rl.className = 'row-label';
+      rl.innerHTML = `<div class="row-task" title="${task.t}">${task.t}</div><div class="row-sub">${task.e} · ${task.b}</div>`;
+      row.appendChild(rl);
+
+      // Timeline
+      const tl = document.createElement('div');
+      tl.className = 'timeline-bg';
+
+      // Month stripes
+      months.forEach((m, idx) => {
+        const s = document.createElement('div');
+        s.className = 'month-stripe';
+        s.style.left = (idx / months.length * 100) + '%';
+        tl.appendChild(s);
+      });
+
+      // Today line
+      if (todayPct > 0 && todayPct < 100) {
+        const tl2 = document.createElement('div');
+        tl2.className = 'today-line';
+        tl2.style.left = todayPct + '%';
+        tl.appendChild(tl2);
+      }
+
+      // Bar
+      const left = pct(task.s);
+      const right = pct(task.end);
+      const width = Math.max(right - left, 0.4);
+      if (width > 0) {
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const col = COLORS[task.g];
+        const isActive = task.st === 'В работе';
+        bar.style.cssText = `left:${left}%;width:${width}%;background:${isActive ? col.active : col.dim};opacity:${isActive ? 1 : 0.8};`;
+        if (!isActive) bar.style.border = `1px solid ${col.active}33`;
+
+        // Tooltip
+        bar.addEventListener('mouseenter', e => showTooltip(e, task));
+        bar.addEventListener('mousemove', e => moveTooltip(e));
+        bar.addEventListener('mouseleave', hideTooltip);
+        tl.appendChild(bar);
+      }
+
+      row.appendChild(tl);
+      gantt.appendChild(row);
+    });
+  });
+}
+
+const tooltip = document.getElementById('tooltip');
+function showTooltip(e, task) {
+  const col = COLORS[task.g].active;
+  tooltip.innerHTML = `
+    <div class="tooltip-title">${task.t}</div>
+    <div class="tooltip-meta">
+      <span style="color:${col}">${task.g}</span><br>
+      ${task.e}<br>
+      ${task.b}<br>
+      ${task.s} → ${task.end}<br>
+      <span style="color:${task.st==='В работе'?'#34d399':'#666'}">${task.st}</span>
+    </div>`;
+  tooltip.style.display = 'block';
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  tooltip.style.left = (e.clientX + 14) + 'px';
+  tooltip.style.top  = (e.clientY - 10) + 'px';
+}
+function hideTooltip() { tooltip.style.display = 'none'; }
+
+render('all');
+
+document.getElementById('filters').addEventListener('click', e => {
+  if (!e.target.dataset.group) return;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  render(e.target.dataset.group);
+});
+</script>
+</body>
+</html>
