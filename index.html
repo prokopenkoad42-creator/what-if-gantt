@@ -370,7 +370,21 @@ function showT(e,task){
     '<div class="tm">'+(task.specialist!=='__ep__'?task.group+'<br>':'')+fmtD(task.start)+' → '+fmtD(task.end)+'</div>';
   tip.style.display='block';mvT(e);
 }
-function mvT(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-8)+'px';}
+function mvT(e){
+  const pad=14, vpW=window.innerWidth, vpH=window.innerHeight;
+  // показать на мгновение чтобы получить реальные размеры
+  tip.style.left='-9999px';tip.style.top='-9999px';
+  const tw=tip.offsetWidth, th=tip.offsetHeight;
+  let x=e.clientX+pad, y=e.clientY-8;
+  // если не помещается справа — слева от курсора
+  if(x+tw>vpW-8) x=e.clientX-tw-pad;
+  // если не помещается снизу — над курсором
+  if(y+th>vpH-8) y=e.clientY-th-pad;
+  // защита от ухода за верх/лево
+  if(x<8) x=8;
+  if(y<8) y=8;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
 function hdT(){tip.style.display='none';}
 document.querySelectorAll('[data-g]').forEach(b=>b.addEventListener('click',()=>{ag=b.dataset.g;as_=null;render();}));
 document.querySelectorAll('[data-z]').forEach(b=>b.addEventListener('click',()=>{zm=b.dataset.z;render();}));
